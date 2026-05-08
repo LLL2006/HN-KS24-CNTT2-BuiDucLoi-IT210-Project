@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <title>Đăng ký tài khoản | Smart Lab</title>
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+  <style>
+    body { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); min-height: 100vh; display: flex; align-items: center; }
+    .register-card { border: none; border-radius: 20px; box-shadow: 0 15px 35px rgba(0,0,0,0.2); background: #fff; }
+    .form-control { border-radius: 50px; padding: 1.2rem 1.5rem; border: 1px solid #e1e5eb; color: #495057 !important; }
+    .is-invalid { border-color: #dc3545 !important; }
+    .btn-register { background: #764ba2; border: none; border-radius: 50px; padding: 12px; font-weight: 600; color: white; transition: 0.3s; }
+    .btn-register:hover { background: #5a3782; transform: translateY(-2px); color: white; }
+    label { font-size: 0.85rem; font-weight: 600; color: #4a5568; margin-left: 15px; }
+    .error-text { color: #dc3545; font-size: 0.75rem; margin-left: 15px; margin-top: 5px; display: block; }
+
+    .custom-select-v2 {
+        height: calc(2.8rem + 2px) !important;
+        border-radius: 50px !important;
+        padding: 0 1.5rem !important;
+        color: #495057 !important;
+        background-color: #ffffff !important;
+        appearance: none;
+        -webkit-appearance: none;
+        background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 4 5'%3e%3cpath fill='%23343a40' d='M2 0L0 2h4zm0 5L0 3h4z'/%3e%3c/svg%3e");
+        background-repeat: no-repeat;
+        background-position: right 1.2rem center;
+        background-size: 8px 10px;
+    }
+.custom-select-v2.is-invalid {
+    border-color: #dc3545 !important;
+    padding-right: 2.25rem !important;
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 4 5'%3e%3cpath fill='%23343a40' d='M2 0L0 2h4zm0 5L0 3h4z'/%3e%3c/svg%3e") !important;
+}
+
+.custom-select-v2, .custom-select-v2 option {
+    color: #495057 !important;
+    background-color: #fff !important;
+}
+    .login-link { color: #764ba2; font-weight: 700; }
+    .login-link:hover { color: #667eea; text-decoration: none; }
+  </style>
+</head>
+<body>
+<div class="container py-5">
+  <div class="row justify-content-center">
+    <div class="col-lg-8">
+      <div class="card register-card p-4">
+        <div class="text-center mb-4">
+          <h3 class="font-weight-bold text-dark">TẠO TÀI KHOẢN</h3>
+          <p class="text-muted small">Tham gia hệ thống Smart Lab dành cho sinh viên</p>
+        </div>
+
+        <form th:action="@{/auth/register}" th:object="${registerRequest}" method="post">
+          <div class="row">
+            <div class="col-md-6 form-group">
+              <label><i class="fas fa-user mr-1"></i> Tên đăng nhập</label>
+              <input type="text" th:field="*{username}" class="form-control" th:classappend="${#fields.hasErrors('username')} ? 'is-invalid'" placeholder="Ví dụ: loi.thang">
+              <small class="error-text" th:if="${#fields.hasErrors('username')}" th:errors="*{username}"></small>
+            </div>
+            <div class="col-md-6 form-group">
+              <label><i class="fas fa-envelope mr-1"></i> Email sinh viên</label>
+              <input type="email" th:field="*{email}" class="form-control" th:classappend="${#fields.hasErrors('email')} ? 'is-invalid'" placeholder="username@ptit.edu.vn">
+              <small class="error-text" th:if="${#fields.hasErrors('email')}" th:errors="*{email}"></small>
+            </div>
+          </div>
+          <div class="row">
+            <div class="col-md-6 form-group">
+              <label><i class="fas fa-key mr-1"></i> Mật khẩu</label>
+              <input type="password" th:field="*{password}" class="form-control" th:classappend="${#fields.hasErrors('password')} ? 'is-invalid'" placeholder="********">
+              <small class="error-text" th:if="${#fields.hasErrors('password')}" th:errors="*{password}"></small>
+            </div>
+            <div class="col-md-6 form-group">
+              <label><i class="fas fa-id-card mr-1"></i> Họ và tên</label>
+              <input type="text" th:field="*{fullName}" class="form-control" th:classappend="${#fields.hasErrors('fullName')} ? 'is-invalid'" placeholder="Nguyễn Văn A">
+              <small class="error-text" th:if="${#fields.hasErrors('fullName')}" th:errors="*{fullName}"></small>
+            </div>
+          </div>
+          <div class="form-group">
+            <label><i class="fas fa-university mr-1"></i> Khoa / Ngành đào tạo</label>
+            <select th:field="*{departmentId}"
+                    class="form-control custom-select-v2"
+                    th:classappend="${#fields.hasErrors('departmentId')} ? 'is-invalid'">
+
+              <option value="">-- Chọn khoa/ngành --</option>
+
+              <option th:each="d : ${departments}"
+                      th:value="${d.id}"
+                      th:text="${d.name}">
+              </option>
+
+            </select>
+            <small class="error-text" th:if="${#fields.hasErrors('departmentId')}" th:errors="*{departmentId}"></small>
+          </div>
+          <button type="submit" class="btn btn-block btn-register mt-4">ĐĂNG KÝ SINH VIÊN</button>
+        </form>
+        <div class="text-center mt-4">
+          <p class="mb-0 text-muted small">Đã là thành viên? <a th:href="@{/auth/login}" class="login-link">Đăng nhập ngay</a></p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+</body>
+</html>

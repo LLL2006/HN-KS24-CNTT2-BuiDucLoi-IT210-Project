@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+
+<head th:replace="~{layout/main-layout :: head('Lịch tư vấn của tôi')}"></head>
+
+<body class="app-page">
+
+<div th:replace="~{layout/main-layout :: sidebar(${sessionUser.role.name()}, 'sessions')}"></div>
+
+<div class="main-content">
+
+    <div th:replace="~{layout/main-layout :: topbar(
+        'Lịch tư vấn của tôi',
+        'Quản lý và theo dõi các buổi hỗ trợ từ giảng viên')}">
+    </div>
+
+    <div class="container-fluid mt-4">
+        <div th:replace="~{layout/main-layout :: alerts}"></div>
+
+        <div class="row">
+            <div class="col-12">
+                <div class="app-card shadow-sm border-0">
+                    <div class="card-body p-4">
+                        <div class="table-responsive">
+                            <table class="table">
+                                <thead>
+                                <tr>
+                                    <th>Ngày</th>
+                                    <th>Giờ</th>
+                                    <th>Giảng viên</th>
+                                    <th>Trạng thái</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                <tr th:each="s : ${sessions}">
+                                    <td th:text="${s.startTime.toLocalDate()}"></td>
+                                    <td th:text="${s.startTime.toLocalTime()}"></td>
+                                    <td th:text="${s.lecturer.user.profile.fullName}"></td>
+                                    <td>
+                                            <span class="badge" th:classappend="${s.status.name() == 'PENDING' ? 'badge-warning' : 'badge-success'}"
+                                                  th:text="${s.status}"></span>
+                                    </td>
+                                </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div th:replace="~{layout/main-layout :: scripts}"></div>
+
+</body>
+</html>

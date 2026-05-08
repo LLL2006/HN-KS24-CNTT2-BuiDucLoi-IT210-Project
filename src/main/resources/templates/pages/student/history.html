@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<body class="app-page">
+
+<section th:replace="~{layout/main-layout :: layout(
+    content=~{::div.history-content},
+    role='STUDENT',
+    active='history',
+    pageTitle='Hồ sơ học tập',
+    breadcrumb='Trang chủ / Hồ sơ'
+)}">
+    <div class="history-content">
+        <div th:if="${#lists.isEmpty(histories)}" class="app-card p-5 text-center">
+            <p class="text-muted">Chưa có lịch sử tư vấn nào được ghi nhận.</p>
+        </div>
+
+        <div th:each="h : ${histories}" class="app-card mb-4 p-4">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h5 class="font-weight-bold text-primary mb-0" th:text="${h.lecturerName}"></h5>
+                <span class="badge badge-success px-3">Hoàn thành</span>
+            </div>
+            <p class="text-muted small" th:text="${#temporals.format(h.sessionDatetime, 'dd/MM/yyyy')}"></p>
+            <div class="p-3 mb-3 bg-light rounded shadow-sm">
+                <strong>Chủ đề:</strong> <span th:text="${h.topic}"></span>
+            </div>
+            <div class="row">
+                <div class="col-md-6 border-right">
+                    <label class="small font-weight-bold text-success">ƯU ĐIỂM</label>
+                    <p class="small" th:text="${h.evaluation?.strengths ?: 'N/A'}"></p>
+                </div>
+                <div class="col-md-6 pl-md-4">
+                    <label class="small font-weight-bold text-danger">CẦN CẢI THIỆN</label>
+                    <p class="small" th:text="${h.evaluation?.weaknesses ?: 'N/A'}"></p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+</body>
+</html>

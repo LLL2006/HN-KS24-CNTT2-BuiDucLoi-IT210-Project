@@ -1,0 +1,145 @@
+<!doctype html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Đăng nhập | Smart Lab</title>
+    <link
+      rel="stylesheet"
+      href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css"
+    />
+    <style>
+      body {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+      }
+      .login-card {
+        border: none;
+        border-radius: 15px;
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+      }
+      .btn-login {
+        background: #764ba2;
+        border: none;
+        border-radius: 25px;
+        padding: 10px;
+        transition: 0.3s;
+        color: white;
+        font-weight: 600;
+      }
+      .btn-login:hover {
+        background: #5a3782;
+        transform: translateY(-2px);
+        color: white;
+      }
+      label {
+        font-weight: 600;
+        color: #4a5568;
+      }
+      .register-link {
+        color: #00d2ff !important; /* Màu xanh Neon nổi bật */
+        font-weight: 700;
+        text-decoration: none;
+      }
+      .register-link:hover {
+        color: #764ba2 !important;
+        text-decoration: underline;
+      }
+      .error-text {
+        color: #dc3545;
+        font-size: 0.75rem;
+        margin-top: 5px;
+        display: block;
+      }
+    </style>
+  </head>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <body>
+    <div class="container">
+      <div class="row justify-content-center">
+        <div class="col-md-5">
+          <div class="card login-card p-4">
+            <div class="text-center mb-4">
+              <h3 class="font-weight-bold text-dark">SMART LAB</h3>
+              <p class="text-muted">Đăng nhập hệ thống hỗ trợ học thuật</p>
+            </div>
+
+            <div
+              th:if="${error}"
+              class="alert alert-danger border-0 mb-3 small"
+              th:text="${error}"
+            ></div>
+            <div
+              th:if="${success}"
+              class="alert alert-success border-0 mb-3 small"
+              th:text="${success}"
+            ></div>
+            <div th:if="${param.logout}"
+                 class="alert alert-success">
+
+              Đăng xuất thành công
+
+            </div>
+
+            <form
+              th:action="@{/auth/login}"
+              th:object="${authRequest}"
+              method="post"
+            >
+              <div class="form-group">
+                <label><i class="fas fa-user mr-2"></i>Tên đăng nhập</label>
+                <input
+                  type="text"
+                  th:field="*{username}"
+                  class="form-control rounded-pill"
+                  th:classappend="${#fields.hasErrors('username')} ? 'is-invalid'"
+                  placeholder="Nhập username..."
+                />
+                <small
+                  class="error-text"
+                  th:if="${#fields.hasErrors('username')}"
+                  th:errors="*{username}"
+                ></small>
+              </div>
+              <div class="form-group">
+                <label><i class="fas fa-lock mr-2"></i>Mật khẩu</label>
+                <input
+                  type="password"
+                  th:field="*{password}"
+                  class="form-control rounded-pill"
+                  th:classappend="${#fields.hasErrors('password')} ? 'is-invalid'"
+                  placeholder="Nhập mật khẩu..."
+                />
+                <small
+                  class="error-text"
+                  th:if="${#fields.hasErrors('password')}"
+                  th:errors="*{password}"
+                ></small>
+              </div>
+              <button
+                type="submit"
+                class="btn btn-block btn-login mt-4 shadow-sm"
+              >
+                ĐĂNG NHẬP
+              </button>
+            </form>
+
+            <div class="text-center mt-4">
+              <p class="mb-0 text-muted small">
+                Chưa có tài khoản?
+                <a th:href="@{/auth/register}" class="register-link"
+                  >Đăng ký ngay</a
+                >
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>

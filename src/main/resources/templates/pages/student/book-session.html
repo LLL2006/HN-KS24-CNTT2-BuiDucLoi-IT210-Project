@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+
+<head th:replace="~{layout/main-layout :: head('Đặt lịch tư vấn')}"></head>
+
+<body class="app-page">
+
+<div th:replace="~{layout/main-layout :: sidebar(${sessionUser.role.name()}, 'booking')}"></div>
+
+<div class="main-content">
+
+    <div th:replace="~{layout/main-layout :: topbar(
+        'Đặt lịch cố vấn',
+        'Chọn giảng viên và thời gian hỗ trợ')}">
+    </div>
+
+    <div class="container-fluid mt-4">
+
+        <div th:replace="~{layout/main-layout :: alerts}"></div>
+
+        <div class="row justify-content-center">
+
+            <div class="col-lg-10">
+
+                <div class="app-card shadow-sm border-0">
+
+                    <div class="card-header bg-white py-3">
+                        <i class="fas fa-calendar-plus text-primary mr-2"></i>
+                        <span class="font-weight-bold text-dark">
+                            Thông tin đặt lịch
+                        </span>
+                    </div>
+
+                    <div class="card-body p-4">
+
+                        <form th:action="@{/student/sessions/book}"
+                              th:object="${bookingRequest}"
+                              method="post"
+                            novalidate>
+
+                            <div class="row">
+
+                                <!-- Khoa -->
+                                <div class="col-md-6 mb-4">
+
+                                    <label class="font-weight-bold mb-2">
+                                        1. Khoa / Ngành hỗ trợ
+                                    </label>
+
+                                    <select class="form-control custom-input"
+                                            id="departmentSelect">
+
+                                        <option value="">
+                                            -- Tất cả khoa --
+                                        </option>
+
+                                        <option th:each="d : ${departments}"
+                                                th:value="${d.id}"
+                                                th:text="${d.name}">
+                                        </option>
+
+                                    </select>
+                                </div>
+
+                                <!-- Giảng viên -->
+                                <div class="col-md-6 mb-4">
+
+                                    <label class="font-weight-bold mb-2">
+                                        2. Giảng viên cố vấn
+                                    </label>
+
+                                    <select class="form-control custom-input"
+                                            th:field="*{lecturerId}"
+                                            id="lecturerSelect">
+
+                                        <option value="">
+                                            -- Chọn giảng viên --
+                                        </option>
+
+                                        <option th:each="l : ${lecturers}"
+                                                th:value="${l.userId}"
+                                                th:text="${l.user.profile != null ? l.user.profile.fullName : l.user.username}"
+                                                th:data-dept="${l.department != null ? l.department.id : ''}">
+                                        </option>
+
+                                    </select>
+
+                                    <small class="text-danger"
+                                           th:if="${#fields.hasErrors('lecturerId')}"
+                                           th:errors="*{lecturerId}">
+                                    </small>
+                                </div>
+
+                                <!-- Ngày -->
+                                <div class="col-md-6 mb-4">
+
+                                    <label class="font-weight-bold mb-2">
+                                        3. Ngày tư vấn
+                                    </label>
+
+                                    <input type="date"
+                                           class="form-control custom-input"
+                                           th:field="*{sessionDate}"
+                                           id="bookingDate">
+
+                                    <small class="text-danger"
+                                           th:if="${#fields.hasErrors('sessionDate')}"
+                                           th:errors="*{sessionDate}">
+                                    </small>
+                                </div>
+
+                                <!-- Giờ -->
+                                <div class="col-md-6 mb-4">
+
+                                    <label class="font-weight-bold mb-2">
+                                        4. Giờ tư vấn
+                                    </label>
+
+                                    <input type="time"
+                                           class="form-control custom-input"
+                                           th:field="*{sessionTime}">
+
+                                    <small class="text-danger"
+                                           th:if="${#fields.hasErrors('sessionTime')}"
+                                           th:errors="*{sessionTime}">
+                                    </small>
+                                </div>
+
+                                <!-- Chủ đề -->
+                                <div class="col-12 mb-4">
+
+                                    <label class="font-weight-bold mb-2">
+                                        5. Chủ đề cần hỗ trợ
+                                    </label>
+
+                                    <textarea class="form-control"
+                                              rows="4"
+                                              th:field="*{topic}"
+                                              placeholder="Nhập nội dung cần hỗ trợ...">
+                                    </textarea>
+
+                                    <small class="text-danger"
+                                           th:if="${#fields.hasErrors('topic')}"
+                                           th:errors="*{topic}">
+                                    </small>
+                                </div>
+
+                            </div>
+
+                            <div class="text-right">
+
+                                <button type="submit"
+                                        class="btn btn-primary-custom px-4 py-2">
+
+                                    <i class="fas fa-check mr-2"></i>
+                                    Xác nhận đặt lịch
+
+                                </button>
+
+                            </div>
+
+                        </form>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div th:replace="~{layout/main-layout :: scripts}"></div>
+
+<style>
+    .custom-input {
+        min-height: 48px !important;
+        height: 48px !important;
+        padding: 10px 14px !important;
+        line-height: normal !important;
+        border-radius: 10px;
+    }
+
+    textarea.form-control {
+        border-radius: 10px;
+    }
+
+    .btn-primary-custom {
+        border-radius: 10px;
+    }
+
+    select.form-control {
+        appearance: auto !important;
+    }
+</style>
+
+<script>
+
+    // Lọc giảng viên theo khoa
+    document.getElementById('departmentSelect')
+        .addEventListener('change', function () {
+
+            const deptId = this.value;
+
+            const options = document.querySelectorAll(
+                '#lecturerSelect option'
+            );
+
+            options.forEach(opt => {
+
+                if (opt.value === "") return;
+
+                opt.style.display =
+                    (deptId === "" || opt.dataset.dept === deptId)
+                        ? "block"
+                        : "none";
+            });
+
+            document.getElementById('lecturerSelect').value = "";
+        });
+
+    // Không cho chọn ngày quá khứ
+    document.getElementById('bookingDate').min =
+        new Date().toISOString().split('T')[0];
+
+</script>
+
+</body>
+</html>

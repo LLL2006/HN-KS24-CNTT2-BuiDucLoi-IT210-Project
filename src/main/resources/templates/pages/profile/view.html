@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+
+<head th:replace="~{layout/main-layout :: head('Hồ sơ cá nhân')}"></head>
+
+<body class="app-page">
+
+<div th:replace="~{layout/main-layout :: sidebar(${sessionUser.role.name()}, 'profile')}"></div>
+
+<div class="main-content">
+
+    <div th:replace="~{layout/main-layout :: topbar('Hồ sơ cá nhân', 'Thông tin tài khoản')}"></div>
+
+    <div class="container-fluid mt-4">
+
+        <div th:replace="~{layout/main-layout :: alerts}"></div>
+
+        <div class="page-header">
+            <div>
+                <h2>Hồ sơ cá nhân</h2>
+                <p>Xem thông tin chi tiết tài khoản của bạn</p>
+            </div>
+
+            <a th:href="@{/profile/edit}" class="btn btn-primary-custom">
+                <i class="fas fa-edit mr-2"></i>Chỉnh sửa hồ sơ
+            </a>
+        </div>
+
+        <div class="row">
+            <div class="col-lg-4 mb-4">
+                <div class="app-card h-100">
+                    <div class="card-body text-center">
+                        <div class="mx-auto mb-3"
+                             style="width:90px;height:90px;border-radius:50%;
+                             background:linear-gradient(135deg,#667eea,#764ba2);
+                             display:flex;align-items:center;justify-content:center;
+                             font-size:32px;font-weight:700;color:white;">
+                            <span th:text="${sessionUser.fullName != null ?
+#strings.substring(sessionUser.fullName,0,1)
+: 'U'}">A</span>
+                        </div>
+
+                        <h4 class="font-weight-bold mb-1" th:text="${profile.fullName}">Nguyễn Văn A</h4>
+                        <span class="status-badge badge-success mt-2" th:text="${sessionUser.role}">STUDENT</span>
+
+                        <hr>
+                        <div class="text-left">
+                            <div class="mb-3">
+                                <small class="text-muted d-block">Tên đăng nhập</small>
+                                <strong th:text="${user.username}">student01</strong>
+                            </div>
+                            <div class="mb-3">
+                                <small class="text-muted d-block">Email</small>
+                                <strong th:text="${user.email}">example@gmail.com</strong>
+                            </div>
+                            <div class="mb-3">
+                                <small class="text-muted d-block">Số điện thoại</small>
+                                <strong th:text="${profile.phone ?: 'Chưa cập nhật'}">0123456789</strong>
+                            </div>
+                            <div>
+                                <small class="text-muted d-block">Địa chỉ</small>
+                                <strong th:text="${profile.address ?: 'Chưa cập nhật'}">Hà Nội</strong>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-8">
+                <div class="app-card mb-4">
+                    <div class="card-header"><i class="fas fa-user-circle mr-2"></i> Thông tin học thuật</div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6 mb-4" th:if="${sessionUser.role.name() != 'ADMIN'}">
+                                <label>Khoa / Ngành</label>
+                                <div class="form-control bg-light" th:text="${profile.department?.name ?: 'Chưa cập nhật'}">CNTT</div>
+                            </div>
+                            <div class="col-md-6 mb-4">
+                                <label>Vai trò</label>
+                                <div class="form-control bg-light" th:text="${sessionUser.role}">STUDENT</div>
+                            </div>
+                            <div class="col-md-6 mb-4">
+                                <label>Ngày tạo tài khoản</label>
+                                <div class="form-control bg-light" th:text="${#temporals.format(user.createdAt,'dd/MM/yyyy HH:mm')}">01/01/2026</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div th:replace="~{layout/main-layout :: scripts}"></div>
+
+</body>
+</html>

@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<body>
+
+<section th:replace="~{layout/main-layout :: layout(~{::div.sessions-container})}">
+    <div class="sessions-container">
+        <div class="d-flex align-items-center justify-content-between mb-4">
+            <h2 class="font-weight-bold text-dark m-0">Lịch tư vấn của tôi</h2>
+            <a th:href="@{/student/booking}" class="btn btn-primary rounded-pill px-4 shadow-sm" style="background: #764ba2; border:none;">
+                <i class="fas fa-plus mr-2"></i>Đặt lịch mới
+            </a>
+        </div>
+
+        <div class="card shadow-sm border-0 overflow-hidden">
+            <div class="table-responsive">
+                <table class="table table-hover mb-0">
+                    <thead class="bg-light">
+                    <tr class="small text-uppercase font-weight-bold text-muted">
+                        <th class="border-0 pl-4">Giảng viên</th>
+                        <th class="border-0">Thời gian</th>
+                        <th class="border-0">Chủ đề</th>
+                        <th class="border-0">Trạng thái</th>
+                        <th class="border-0 text-center">Thao tác</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:if="${#lists.isEmpty(sessions)}">
+                        <td colspan="5" class="text-center py-5 text-muted">Bạn chưa có lịch tư vấn nào.</td>
+                    </tr>
+                    <tr th:each="s : ${sessions}">
+                        <td class="pl-4 align-middle">
+                            <div class="font-weight-bold text-dark" th:text="${s.lecturerName}">TS. Nguyễn Văn A</div>
+                            <small class="text-muted" th:text="${s.departmentName}">Khoa CNTT</small>
+                        </td>
+                        <td class="align-middle">
+                            <div th:text="${#temporals.format(s.sessionDatetime, 'dd/MM/yyyy')}">10/05/2026</div>
+                            <small class="text-primary font-weight-bold" th:text="${#temporals.format(s.sessionDatetime, 'HH:mm')}">14:00</small>
+                        </td>
+                        <td class="align-middle">
+                            <span class="d-inline-block text-truncate" style="max-width: 200px;" th:text="${s.topic}">Chủ đề</span>
+                        </td>
+                        <td class="align-middle">
+                            <span th:if="${s.status.name() == 'PENDING'}" class="badge badge-warning px-3 py-2 rounded-pill">Chờ duyệt</span>
+                            <span th:if="${s.status.name() == 'COMPLETED'}" class="badge badge-success px-3 py-2 rounded-pill">Hoàn thành</span>
+                            <span th:if="${s.status.name() == 'CANCELLED'}" class="badge badge-secondary px-3 py-2 rounded-pill">Đã hủy</span>
+                        </td>
+                        <td class="text-center align-middle">
+                            <form th:if="${s.status.name() == 'PENDING'}" th:action="@{/student/sessions/{id}/cancel(id=${s.id})}" method="post">
+                                <button type="submit" class="btn btn-sm btn-outline-danger rounded-pill px-3"
+                                        onclick="return confirm('Bạn có chắc muốn hủy lịch này?')">Hủy</button>
+                            </form>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</section>
+
+</body>
+</html>

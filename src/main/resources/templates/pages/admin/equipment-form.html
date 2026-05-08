@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+
+<head th:replace="~{layout/main-layout :: head('Thiết bị')}"></head>
+
+<body class="app-page">
+
+<div th:replace="~{layout/main-layout :: sidebar(${sessionUser.role.name()}, 'equipments')}"></div>
+
+<div class="main-content">
+
+    <div th:replace="~{layout/main-layout :: topbar('Thiết bị', ${equipmentId != null ? 'Cập nhật thiết bị' : 'Thêm thiết bị mới'})}"></div>
+
+    <div class="container-fluid mt-4">
+
+        <div th:replace="~{layout/main-layout :: alerts}"></div>
+
+        <div class="row justify-content-center">
+            <div class="col-lg-8">
+                <div class="app-card">
+                    <div class="card-header">
+                        <i class="fas fa-tools mr-2"></i>
+                        <span th:text="${equipmentId != null ? 'Chỉnh sửa thông tin' : 'Nhập thông tin thiết bị'}"></span>
+                    </div>
+
+                    <div class="card-body">
+                        <form th:action="${equipmentId != null} ? @{'/admin/equipments/edit/' + ${equipmentId}} : @{/admin/equipments/create}"
+                              th:object="${equipmentRequest}"
+                              method="post">
+
+                            <div class="form-group">
+                                <label>Tên thiết bị</label>
+                                <input type="text" class="form-control" th:field="*{name}" placeholder="Ví dụ: Laptop Dell XPS 15">
+                                <small class="text-danger" th:if="${#fields.hasErrors('name')}" th:errors="*{name}"></small>
+                            </div>
+
+                            <div class="form-group">
+                                <label>Mô tả</label>
+                                <textarea class="form-control" rows="4" th:field="*{description}" placeholder="Mô tả tình trạng, cấu hình..."></textarea>
+                            </div>
+
+                            <div class="form-group">
+                                <label>Số lượng tổng</label>
+                                <input type="number" class="form-control" th:field="*{quantity}" min="1">
+                                <small class="text-danger" th:if="${#fields.hasErrors('quantity')}" th:errors="*{quantity}"></small>
+                            </div>
+
+                            <div class="d-flex justify-content-end mt-4">
+                                <a th:href="@{/admin/equipments}" class="btn btn-outline-custom mr-2">Hủy</a>
+                                <button type="submit" class="btn btn-primary-custom">
+                                    <i class="fas fa-save mr-2"></i> Lưu thiết bị
+                                </button>
+                            </div>
+
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div th:replace="~{layout/main-layout :: scripts}"></div>
+
+</body>
+</html>

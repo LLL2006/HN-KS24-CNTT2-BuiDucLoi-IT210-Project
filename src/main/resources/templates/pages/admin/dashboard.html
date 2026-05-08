@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="vi"
+      xmlns:th="http://www.thymeleaf.org">
+
+<head th:replace="~{layout/main-layout :: head('Admin Dashboard')}"></head>
+
+<body>
+
+<div th:replace="~{layout/main-layout :: sidebar(${sessionUser.role.name()}, 'dashboard')}"></div>
+
+<div class="main-content">
+
+    <div th:replace="~{layout/main-layout :: topbar('Dashboard','Quản trị hệ thống')}"></div>
+
+    <div class="container-fluid mt-4">
+
+        <div class="app-card">
+
+            <div class="card-body">
+
+                <h3>Trang quản trị hệ thống</h3>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+<div th:replace="~{layout/main-layout :: scripts}"></div>
+
+</body>
+</html>

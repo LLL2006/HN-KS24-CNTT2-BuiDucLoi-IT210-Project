@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head th:replace="~{layout/main-layout :: head('Dashboard')}"></head>
+
+<body class="app-page">
+
+<div th:replace="~{layout/main-layout :: sidebar(${sessionUser.role.name()}, 'dashboard')}"></div>
+
+<div class="main-content">
+
+    <div th:replace="~{layout/main-layout :: topbar('Dashboard', 'Tổng quan sinh viên')}"></div>
+
+    <div class="container-fluid mt-4">
+        <div class="app-card">
+            <div class="card-body">
+                <h3>Xin chào, <span th:text="${sessionUser.fullName}"></span></h3>
+                <p>Hệ thống Smart Lab hoạt động thành công. Bạn có thể bắt đầu đặt lịch cố vấn ngay bây giờ.</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div th:replace="~{layout/main-layout :: scripts}"></div>
+
+</body>
+</html>

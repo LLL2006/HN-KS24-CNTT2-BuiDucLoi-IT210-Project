@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{layout/main-layout :: head('Thiết bị')}"></head>
+
+<body>
+<div th:replace="~{layout/main-layout :: sidebar(${sessionUser.role.name()}, 'equipments')}"></div>
+
+<div class="main-content">
+    <div th:replace="~{layout/main-layout :: topbar('Quản lý thiết bị','Danh sách thiết bị')}"></div>
+
+    <div class="container-fluid mt-4">
+        <div th:replace="~{layout/main-layout :: alerts}"></div>
+
+        <div class="d-flex justify-content-between mb-3">
+            <h3>Danh sách thiết bị</h3>
+            <a th:href="@{/admin/equipments/create}" class="btn btn-primary-custom">Thêm thiết bị</a>
+        </div>
+
+        <div class="app-card">
+            <div class="card-body">
+                <table class="table table-hover table-custom">
+                    <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Tên</th>
+                        <th>Mô tả</th>
+                        <th>Số lượng</th>
+                        <th>Trạng thái</th>
+                        <th width="220">Hành động</th>
+                    </tr>
+                    </thead>
+
+                    <tbody>
+
+                    <tr th:each="e : ${equipments}">
+
+                        <td th:text="${e.id}"></td>
+
+                        <td th:text="${e.name}"></td>
+
+                        <td th:text="${e.description}"></td>
+
+                        <td th:text="${e.quantity}"></td>
+
+                        <td>
+        <span th:if="${e.active}"
+              class="badge badge-success px-3 py-2">
+            Đang hoạt động
+        </span>
+
+                            <span th:unless="${e.active}"
+                                  class="badge badge-secondary px-3 py-2">
+            Ngưng sử dụng
+        </span>
+                        </td>
+
+                        <td>
+
+                            <a th:href="@{'/admin/equipments/edit/' + ${e.id}}"
+                               class="btn btn-sm btn-warning">
+                                Sửa
+                            </a>
+
+                            <a th:href="@{'/admin/equipments/delete/' + ${e.id}}"
+                               class="btn btn-sm btn-danger"
+                               onclick="return confirm('Xóa nhé?')">
+
+                                Xóa
+                            </a>
+
+                        </td>
+
+                    </tr>
+
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+<div th:replace="~{layout/main-layout :: scripts}"></div>
+</body>
+</html>

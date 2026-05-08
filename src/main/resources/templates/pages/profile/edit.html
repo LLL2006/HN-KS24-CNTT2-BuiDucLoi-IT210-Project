@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+
+<head th:replace="~{layout/main-layout :: head('Chỉnh sửa hồ sơ')}"></head>
+
+<body class="app-page">
+
+<div th:replace="~{layout/main-layout :: sidebar(${sessionUser.role.name()}, 'profile')}"></div>
+
+<div class="main-content">
+    <div th:replace="~{layout/main-layout :: topbar('Chỉnh sửa hồ sơ', 'Cập nhật thông tin cá nhân')}"></div>
+
+    <div class="container-fluid mt-4">
+        <div th:replace="~{layout/main-layout :: alerts}"></div>
+
+        <div class="row justify-content-center">
+            <div class="col-lg-8">
+                <div class="app-card">
+                    <div class="card-header"><i class="fas fa-user-edit mr-2"></i> Thông tin cá nhân</div>
+                    <div class="card-body">
+                        <form th:action="@{/profile/edit}" th:object="${profileRequest}" method="post">
+                            <div class="row">
+                                <div class="col-md-6 mb-4">
+                                    <label>Họ và tên</label>
+                                    <input type="text" class="form-control" th:field="*{fullName}">
+                                    <small class="text-danger" th:if="${#fields.hasErrors('fullName')}" th:errors="*{fullName}"></small>
+                                </div>
+                                <div class="col-md-6 mb-4">
+                                    <label>Số điện thoại</label>
+                                    <input type="text" class="form-control" th:field="*{phone}">
+                                </div>
+                                <div class="col-12 mb-4">
+                                    <label>Địa chỉ</label>
+                                    <textarea class="form-control" rows="4" th:field="*{address}"></textarea>
+                                </div>
+                            </div>
+                            <div class="d-flex justify-content-end mt-2">
+                                <a th:href="@{/profile}" class="btn btn-outline-custom mr-2">Hủy</a>
+                                <button type="submit" class="btn btn-primary-custom">Lưu thay đổi</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div th:replace="~{layout/main-layout :: scripts}"></div>
+
+</body>
+</html>

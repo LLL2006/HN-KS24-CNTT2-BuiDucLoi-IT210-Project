@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="fragments/layout :: head('Cấp phát thiết bị')"></head>
+<body class="app-page">
+
+<nav th:replace="fragments/layout :: sidebar('ADMIN', 'borrowings')"></nav>
+<header th:replace="fragments/layout :: topbar('Cấp phát thiết bị',
+    '<a href=\'/admin/dashboard\'>Dashboard</a> <span class=\'sep\'>/</span> Cấp phát thiết bị')"></header>
+
+<main class="main-content">
+    <div th:replace="fragments/layout :: alerts"></div>
+
+    <div class="page-header">
+        <div>
+            <h2>Quản lý cấp phát thiết bị</h2>
+            <p>Xác nhận xuất kho và theo dõi thiết bị đang mượn</p>
+        </div>
+    </div>
+
+    <!-- Tabs -->
+    <ul class="nav mb-3" style="gap:6px">
+        <li><a th:href="@{/admin/borrowings}" class="btn btn-sm"
+               th:classappend="${currentFilter == null} ? 'btn-purple' : 'btn-outline-purple'">Tất cả</a></li>
+        <li><a th:href="@{/admin/borrowings(status='WAITING_ALLOCATION')}" class="btn btn-sm"
+               th:classappend="${currentFilter=='WAITING_ALLOCATION'} ? 'btn-purple' : 'btn-outline-purple'">
+            <i class="fas fa-hourglass-half mr-1"></i>Chờ cấp phát
+            <span th:if="${waitingCount > 0}" class="ml-1 badge badge-danger" th:text="${waitingCount}">5</span>
+        </a></li>
+        <li><a th:href="@{/admin/borrowings(status='ISSUED')}" class="btn btn-sm"
+               th:classappend="${currentFilter=='ISSUED'} ? 'btn-purple' : 'btn-outline-purple'">Đã xuất kho</a></li>
+        <li><a th:href="@{/admin/borrowings(status='RETURNED')}" class="btn btn-sm"
+               th:classappend="${currentFilter=='RETURNED'} ? 'btn-purple' : 'btn-outline-purple'">Đã trả</a></li>
+        <li><a th:href="@{/admin/borrowings(status='OVERDUE')}" class="btn btn-sm"
+               th:classappend="${currentFilter=='OVERDUE'} ? 'btn-purple' : 'btn-outline-purple'">
+            <i class="fas fa-exclamation-triangle mr-1"></i>Quá hạn
+        </a></li>
+    </ul>
+
+    <!-- WAITING list — ưu tiên hiển thị trước -->
+    <div th:if="${currentFilter == null or currentFilter == 'WAITING_ALLOCATION'}">
+        <div class="smart-alert warning" th:if="${waitingCount > 0}">
+            <i class="fas fa-exclamation-triangle"></i>
+            <span>Có <strong th:text="${waitingCount}">5</strong> phiếu mượn đang chờ xác nhận xuất kho!</span>
+        </div>
+    </div>
+
+    <div class="app-card">
+        <div class="card-body p-0">
+            <table class="smart-table">
+                <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Sinh viên</th>
+                    <th>Giảng viên chỉ định</th>
+                    <th>Thiết bị trong phiếu</th>
+                    <th>Hạn trả</th>
+                    <th>Trạng thái</th>
+                    <th class="text-center">Thao tác</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:if="${borrowings == null or #lists.isEmpty(borrowings)}">
+                    <td colspan="7" class="text-center py-5 text-muted">
+                        <i class="fas fa-box fa-3x mb-3 d-block" style="opacity:.25"></i>
+                        Không có phiếu mượn nào
+                    </td>
+                </tr>
+                <tr th:each="b, stat : ${borrowings}">
+                    <td style="color:var(--text-muted);font-size:.8rem" th:text="${stat.count}">1</td>
+                    <td>
+                        <div style="font-weight:600" th:text="${b.studentName}">Nguyễn Văn B</div>
+                        <div class="text-muted" style="font-size:.78rem" th:text="${b.studentCode}">SV001</div>
+                    </td>
+                    <td>
+                        <div style="font-size:.87rem" th:text="${b.lecturerName}">TS. Nguyễn Minh</div>
+                        <div class="text-muted" style="font-size:.75rem"
+                             th:text="${#temporals.format(b.sessionDatetime,'dd/MM HH:mm')}">20/06 09:00</div>
+                    </td>
+                    <td>
+                        <!-- Danh sách thiết bị trong phiếu -->
+                        <div th:each="detail : ${b.details}" style="font-size:.82rem;margin-bottom:2px">
+                            <span style="font-weight:600" th:text="${detail.equipmentName}">Arduino Kit</span>
+                            <span class="text-muted" th:text="' × ' + detail.quantity + ' ' + detail.unit">× 2 bộ</span>
+                            <!-- Cảnh báo thiếu tồn kho -->
+                            <span th:if="${detail.stockAvailable < detail.quantity}"
+                                  style="color:var(--danger);font-size:.72rem;margin-left:4px">
+                                    <i class="fas fa-exclamation-triangle"></i>Tồn kho chỉ còn <span th:text="${detail.stockAvailable}">1</span>
+                                </span>
+                        </div>
+                    </td>
+                    <td>
+                            <span th:if="${b.dueDate != null}"
+                                  th:text="${#temporals.format(b.dueDate,'dd/MM/yyyy')}"
+                                  th:style="${b.isOverdue} ? 'color:var(--danger);font-weight:700' : ''">30/06/2025</span>
+                        <span th:unless="${b.dueDate != null}" class="text-muted">—</span>
+                    </td>
+                    <td>
+                            <span th:switch="${b.status?.name()}">
+                                <span th:case="'WAITING_ALLOCATION'" class="status-badge badge-waiting"><span class="dot"></span>Chờ cấp phát</span>
+                                <span th:case="'ISSUED'"             class="status-badge badge-issued"><span class="dot"></span>Đã xuất kho</span>
+                                <span th:case="'RETURNED'"           class="status-badge badge-completed"><span class="dot"></span>Đã trả</span>
+                                <span th:case="'OVERDUE'"            class="status-badge badge-overdue"><span class="dot"></span>Quá hạn!</span>
+                            </span>
+                    </td>
+                    <td class="text-center">
+                        <div class="d-flex justify-content-center" style="gap:6px;flex-wrap:wrap">
+                            <!-- Xác nhận xuất kho (CORE-08) -->
+                            <form th:if="${b.status?.name() == 'WAITING_ALLOCATION'}"
+                                  th:action="@{/admin/borrowings/{id}/approve(id=${b.id})}" method="post"
+                                  onsubmit="return confirm('Xác nhận xuất kho phiếu mượn này?\n\nHệ thống sẽ kiểm tra tồn kho và trừ số lượng tự động.')">
+                                <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+                                <button type="submit" class="btn btn-sm btn-purple" style="font-size:.78rem">
+                                    <i class="fas fa-check mr-1"></i>Xuất kho
+                                </button>
+                            </form>
+                            <!-- Xác nhận đã trả -->
+                            <form th:if="${b.status?.name() == 'ISSUED' or b.status?.name() == 'OVERDUE'}"
+                                  th:action="@{/admin/borrowings/{id}/return(id=${b.id})}" method="post"
+                                  onsubmit="return confirm('Xác nhận sinh viên đã trả thiết bị?')">
+                                <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+                                <button type="submit" class="btn btn-sm btn-outline-purple" style="font-size:.78rem">
+                                    <i class="fas fa-undo mr-1"></i>Đã trả
+                                </button>
+                            </form>
+                            <!-- Xem chi tiết -->
+                            <a th:href="@{/admin/borrowings/{id}(id=${b.id})}"
+                               class="btn btn-sm btn-outline-secondary" style="border-radius:50px;font-size:.78rem" title="Chi tiết">
+                                <i class="fas fa-eye"></i>
+                            </a>
+                        </div>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</main>
+
+<div th:replace="fragments/layout :: scripts"></div>
+</body>
+</html>
