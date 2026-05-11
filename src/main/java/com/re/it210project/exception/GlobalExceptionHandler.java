@@ -28,7 +28,7 @@ public class GlobalExceptionHandler {
                 exception.getMessage()
         );
 
-        return "error/business-error";
+        return "error/500";
     }
 
     @ExceptionHandler(Exception.class)

@@ -6,10 +6,7 @@ import com.re.it210project.model.entity.Equipment;
 import com.re.it210project.model.entity.PaymentTransaction;
 import com.re.it210project.model.entity.SessionUser;
 import com.re.it210project.model.enums.BorrowingStatus;
-import com.re.it210project.repository.BorrowingRecordRepository;
-import com.re.it210project.repository.EquipmentRepository;
-import com.re.it210project.repository.MentoringSessionRepository;
-import com.re.it210project.repository.PaymentTransactionRepository;
+import com.re.it210project.repository.*;
 import com.re.it210project.service.BorrowingService;
 import com.re.it210project.service.EquipmentService;
 import jakarta.servlet.http.HttpSession;
@@ -30,39 +27,30 @@ import java.util.List;
 @RequestMapping("/admin")
 @RequiredArgsConstructor
 public class AdminController {
-
     private final EquipmentRepository equipmentRepository;
     private final BorrowingService borrowingService;
     private final MentoringSessionRepository mentoringSessionRepository;
     private final EquipmentService equipmentService;
     private final BorrowingRecordRepository borrowingRecordRepository;
     private final PaymentTransactionRepository paymentTransactionRepository;
-    private final BorrowingRecordRepository borrowingRepository;
-
+    private final DepartmentRepository departmentRepository;
 
     @GetMapping("/dashboard")
     public String dashboard(HttpSession session, Model model) {
         SessionUser sessionUser = (SessionUser) session.getAttribute("sessionUser");
 
-        // 1. Thống kê số lượng cho các thẻ Card
-        // Lấy tổng thiết bị từ EquipmentService ( findAll().size() )
         model.addAttribute("totalEquipments", equipmentService.findAll().size());
 
-        // Lấy các ca PENDING bằng hàm countByLecturerUserIdAndStatus nhưng truyền null cho LecturerId
-        // Hoặc dùng countSessionsByStatus() bạn vừa viết để bóc tách dữ liệu
         List<Object[]> statusCounts = mentoringSessionRepository.countSessionsByStatus();
         long pendingCount = 0;
         for (Object[] row : statusCounts) {
             if (row[0].toString().equals("PENDING")) pendingCount = (long) row[1];
         }
+
         model.addAttribute("pendingSessions", pendingCount);
-        // Tiêm BorrowingRecordRepository vào Controller trước nhé
         model.addAttribute("borrowedCount", borrowingRecordRepository.countActiveBorrowings());
 
-        // 2. Lấy Top 5 Giảng viên cho biểu đồ
-        // Sử dụng PageRequest để giới hạn 5 bản ghi cho hàm getTop5Lecturers
         List<Object[]> topData = mentoringSessionRepository.getTop5Lecturers(PageRequest.of(0, 5));
-
         List<String> lecturerNames = new ArrayList<>();
         List<Long> sessionCounts = new ArrayList<>();
 
@@ -70,13 +58,12 @@ public class AdminController {
             lecturerNames.add((String) row[0]);
             sessionCounts.add((Long) row[1]);
         }
+
         model.addAttribute("recentBorrowings",
                 borrowingRecordRepository.findTop5RecentBorrowings(PageRequest.of(0, 5)));
-
         model.addAttribute("lowStockEquipments",
                 equipmentRepository.findLowStockEquipments());
         model.addAttribute("totalSessions", mentoringSessionRepository.count());
-
         model.addAttribute("lecturerNames", lecturerNames);
         model.addAttribute("sessionCounts", sessionCounts);
         model.addAttribute("sessionUser", sessionUser);
@@ -89,12 +76,9 @@ public class AdminController {
             HttpSession session,
             Model model
     ) {
-
         SessionUser sessionUser =
                 (SessionUser) session.getAttribute("sessionUser");
-
         model.addAttribute("sessionUser", sessionUser);
-
         model.addAttribute(
                 "borrowings",
                 borrowingService.findAll()
@@ -109,13 +93,10 @@ public class AdminController {
             HttpSession session,
             Model model
     ) {
-
         SessionUser sessionUser =
                 (SessionUser) session.getAttribute("sessionUser");
-
         model.addAttribute("sessionUser", sessionUser);
         model.addAttribute("active", "borrowings");
-
         model.addAttribute(
                 "record",
                 borrowingService.findById(id)
@@ -130,15 +111,12 @@ public class AdminController {
             RedirectAttributes ra,
             HttpSession session
     ) {
-
         SessionUser sessionUser =
                 (SessionUser) session.getAttribute("sessionUser");
-
         borrowingService.returnEquipment(id);
-
         ra.addFlashAttribute(
                 "successMsg",
-                "Đã xác nhận trả thiết bị!"
+                "Đã xác nhận trả thiết bị"
         );
 
         return "redirect:/admin/borrowings";
@@ -150,18 +128,19 @@ public class AdminController {
             RedirectAttributes ra,
             HttpSession session
     ) {
+        SessionUser sessionUser = (SessionUser) session.getAttribute("sessionUser");
 
-        SessionUser sessionUser =
-                (SessionUser) session.getAttribute("sessionUser");
-
-        borrowingService.approveExport(id);
-
-        ra.addFlashAttribute(
-                "successMsg",
-                "Xuất kho thành công!"
-        );
-
-        return "redirect:/admin/borrowings";
+        try {
+            borrowingService.approveExport(id);
+            ra.addFlashAttribute("successMsg", "Xuất kho thiết bị thành công");
+            return "redirect:/admin/borrowings/" + id;
+        } catch (com.re.it210project.exception.BadRequestException e) {
+            ra.addFlashAttribute("errorMsg", e.getMessage());
+            return "redirect:/admin/borrowings/" + id;
+        } catch (Exception e) {
+            ra.addFlashAttribute("errorMsg", "Lỗi hệ thống: " + e.getMessage());
+            return "redirect:/admin/borrowings/" + id;
+        }
     }
 
     @PostMapping("/borrowings/{id}/reject")
@@ -170,16 +149,12 @@ public class AdminController {
             RedirectAttributes ra,
             HttpSession session
     ) {
-
         SessionUser sessionUser =
                 (SessionUser) session.getAttribute("sessionUser");
-
-
         borrowingService.rejectExport(id);
-
         ra.addFlashAttribute(
                 "successMsg",
-                "Đã từ chối phiếu mượn!"
+                "Đã từ chối phiếu mượn"
         );
 
         return "redirect:/admin/borrowings";
@@ -188,7 +163,6 @@ public class AdminController {
     @GetMapping("/equipments")
     public String equipments(HttpSession session, Model model) {
         SessionUser sessionUser = (SessionUser) session.getAttribute("sessionUser");
-        if (sessionUser == null) return "redirect:/auth/login";
 
         model.addAttribute("sessionUser", sessionUser);
         model.addAttribute("active", "equipments");
@@ -202,9 +176,7 @@ public class AdminController {
 
         SessionUser sessionUser =
                 (SessionUser) session.getAttribute("sessionUser");
-
         model.addAttribute("sessionUser", sessionUser);
-
         model.addAttribute(
                 "equipmentRequest",
                 new EquipmentRequest()
@@ -217,18 +189,14 @@ public class AdminController {
     public String create(
             @Valid @ModelAttribute("equipmentRequest")
             EquipmentRequest request,
-
             BindingResult result,
-
             HttpSession session,
             Model model,
             RedirectAttributes ra
     ) {
-
         if (Boolean.TRUE.equals(request.getRequiresDeposit())
                 && (request.getDepositAmount() == null
                 || request.getDepositAmount() <= 0)) {
-
             result.rejectValue(
                     "depositAmount",
                     "error.depositAmount",
@@ -237,12 +205,10 @@ public class AdminController {
         }
 
         if (result.hasErrors()) {
-
             SessionUser sessionUser =
                     (SessionUser) session.getAttribute(
                             "sessionUser"
                     );
-
             model.addAttribute(
                     "sessionUser",
                     sessionUser
@@ -252,23 +218,16 @@ public class AdminController {
         }
 
         Equipment equipment = Equipment.builder()
-
                 .name(request.getName())
-
                 .description(request.getDescription())
-
                 .quantity(request.getQuantity())
-
                 .requiresDeposit(
                         request.getRequiresDeposit()
                 )
-
                 .depositAmount(
                         request.getDepositAmount()
                 )
-
                 .active(true)
-
                 .build();
 
         equipmentRepository.save(equipment);
@@ -288,10 +247,8 @@ public class AdminController {
             Model model,
             RedirectAttributes ra
     ) {
-
         SessionUser sessionUser =
                 (SessionUser) session.getAttribute("sessionUser");
-
         Equipment equipment = equipmentRepository
                 .findById(id)
                 .orElse(null);
@@ -327,12 +284,9 @@ public class AdminController {
             Model model,
             RedirectAttributes ra
     ) {
-
         SessionUser sessionUser =
                 (SessionUser) session.getAttribute("sessionUser");
-
         if (result.hasErrors()) {
-
             model.addAttribute("sessionUser", sessionUser);
             model.addAttribute("equipmentId", id);
 
@@ -342,9 +296,7 @@ public class AdminController {
         Equipment equipment = equipmentRepository
                 .findById(id)
                 .orElse(null);
-
         if (equipment == null) {
-
             ra.addFlashAttribute(
                     "errorMsg",
                     "Thiết bị không tồn tại!"
@@ -356,7 +308,6 @@ public class AdminController {
         equipment.setName(request.getName());
         equipment.setDescription(request.getDescription());
         equipment.setQuantity(request.getQuantity());
-
         equipmentRepository.save(equipment);
 
         ra.addFlashAttribute(
@@ -373,6 +324,7 @@ public class AdminController {
         equipment.setActive(false);
         equipmentRepository.save(equipment);
         ra.addFlashAttribute("successMsg", "Đã ngừng hoạt động thiết bị!");
+
         return "redirect:/admin/equipments";
     }
 
@@ -380,31 +332,35 @@ public class AdminController {
     public String paymentReturn(
             @RequestParam String txnRef
     ) {
-
         PaymentTransaction transaction =
                 paymentTransactionRepository
                         .findByTransactionRef(txnRef)
                         .orElseThrow();
-
         BorrowingRecord borrowing =
                 transaction.getBorrowingRecord();
-
         borrowing.setStatus(
                 BorrowingStatus.EXPORTED
         );
-
         borrowing.setExportedAt(
                 LocalDateTime.now()
         );
-
         transaction.setPaidAt(
                 LocalDateTime.now()
         );
 
-        borrowingRepository.save(borrowing);
-
+        borrowingRecordRepository.save(borrowing);
         paymentTransactionRepository.save(transaction);
 
         return "Thanh toán thành công";
+    }
+
+    @GetMapping("/departments")
+    public String listDepartments(HttpSession session, Model model) {
+        SessionUser sessionUser = (SessionUser) session.getAttribute("sessionUser");
+        model.addAttribute("sessionUser", sessionUser);
+        model.addAttribute("active", "departments");
+        model.addAttribute("departments", departmentRepository.findAll());
+
+        return "pages/admin/departments";
     }
 }

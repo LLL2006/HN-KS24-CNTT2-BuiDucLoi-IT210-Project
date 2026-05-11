@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{layout/main-layout :: head('Danh mục Khoa & Phòng Lab')}"></head>
+<body class="app-page">
+<div th:replace="~{layout/main-layout :: sidebar(${sessionUser.role.name()}, 'departments')}"></div>
+
+<div class="main-content">
+    <div th:replace="~{layout/main-layout :: topbar('Cơ cấu tổ chức', 'Danh mục các Khoa và hệ thống phòng Lab thực hành')}"></div>
+
+    <div class="container-fluid mt-4">
+        <div class="row">
+            <div th:each="dept : ${departments}" class="col-md-6 mb-4">
+                <div class="app-card shadow-sm border-0 h-100">
+                    <div class="card-header bg-white border-bottom-0 pt-4 px-4 d-flex justify-content-between align-items-start">
+                        <div>
+                            <span class="badge badge-primary mb-2" th:text="${dept.code}">Mã khoa</span>
+                            <h5 class="font-weight-bold text-dark mb-0" th:text="${dept.name}">Tên khoa</h5>
+                        </div>
+                        <div class="icon-shape bg-light-primary text-primary rounded-circle p-3">
+                            <i class="fas fa-university fa-lg"></i>
+                        </div>
+                    </div>
+
+                    <div class="card-body px-4 pb-4">
+                        <div class="mt-3">
+                            <label class="text-muted small font-weight-bold text-uppercase mb-3 d-block">
+                                <i class="fas fa-door-open mr-1"></i> Danh sách phòng Lab
+                            </label>
+
+                            <div class="list-group list-group-flush">
+                                <div th:each="lab : ${dept.labRooms}"
+                                     class="list-group-item px-0 border-top-0 d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <span class="font-weight-bold text-dark d-block" th:text="${lab.name}">Tên phòng</span>
+                                        <small class="text-muted"><i class="fas fa-map-marker-alt mr-1"></i> Số phòng: [[${lab.roomNumber}]]</small>
+                                    </div>
+                                    <span class="badge badge-pill badge-light text-primary border">Đang hoạt động</span>
+                                </div>
+
+                                <div th:if="${#lists.isEmpty(dept.labRooms)}" class="text-center py-3">
+                                    <small class="text-muted italic">Chưa có phòng Lab nào được đăng ký.</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div th:replace="~{layout/main-layout :: scripts}"></div>
+<style>
+    .bg-light-primary { background-color: rgba(106, 17, 203, 0.1); }
+    .icon-shape { width: 48px; height: 48px; display: flex; align-items: center; justify-content: center; }
+</style>
+</body>
+</html>

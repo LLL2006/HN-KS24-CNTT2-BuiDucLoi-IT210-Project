@@ -56,14 +56,12 @@
                             </div>
 
                             <div class="form-group">
-
                                 <label>Số tiền cọc (VNĐ)</label>
-
                                 <input type="number"
                                        class="form-control"
                                        th:field="*{depositAmount}"
-                                       min="0">
-
+                                       min="0"
+                                       onkeydown="return ['e', 'E', '+', '-', '.'].includes(event.key) ? false : true">
                             </div>
 
                             <div class="d-flex justify-content-end mt-4">

@@ -303,21 +303,20 @@
             background:rgba(255,255,255,.08);
         }
 
-        .user-avatar{
-            width:42px;
-            height:42px;
+        .user-avatar {
+    width: 42px;
+    height: 42px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--secondary), var(--primary));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    color: #fff;
 
-            border-radius:50%;
-
-            background:linear-gradient(135deg,var(--secondary),var(--primary));
-
-            display:flex;
-            align-items:center;
-            justify-content:center;
-
-            font-weight:700;
-            color:#fff;
-        }
+    /* Dòng quan trọng nhất để sửa lỗi quả trứng */
+    flex-shrink: 0;
+}
 
         .user-name{
             color:#fff;
@@ -697,6 +696,13 @@
                th:classappend="${active == 'borrowings'} ? 'active'">
                 <i class="fas fa-boxes"></i>
                 Cấp phát thiết bị
+            </a>
+
+            <a th:href="@{/admin/departments}"
+               class="sidebar-link"
+               th:classappend="${active == 'departments'} ? 'active'">
+                <i class="fas fa-university"></i>
+                Khoa/Ngành & Phòng Lab
             </a>
 
         </div>

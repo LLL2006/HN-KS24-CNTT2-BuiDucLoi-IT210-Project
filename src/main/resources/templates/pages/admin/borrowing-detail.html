@@ -75,6 +75,26 @@
                                     <td class="text-center" th:text="${detail.quantity}"></td>
                                     <td class="text-center" th:text="${detail.equipment.quantity}"></td>
                                     <td class="text-center">
+                                        <th:block th:if="${record.status.name() == 'PENDING_ALLOCATION'}">
+        <span th:if="${detail.quantity > detail.equipment.quantity}" class="text-danger">
+            <i class="fas fa-exclamation-triangle" title="Không đủ hàng trong kho"></i>
+        </span>
+                                            <span th:if="${detail.quantity <= detail.equipment.quantity}" class="text-success">
+            <i class="fas fa-check-circle" title="Đủ hàng"></i>
+        </span>
+                                        </th:block>
+
+                                        <th:block th:if="${record.status.name() == 'EXPORTED'}">
+        <span class="text-success">
+            <i class="fas fa-box-open" title="Đã bàn giao cho SV"></i>
+        </span>
+                                        </th:block>
+
+                                        <th:block th:if="${record.status.name() == 'RETURNED'}">
+        <span class="text-info">
+            <i class="fas fa-history" title="Đã hoàn trả"></i>
+        </span>
+                                        </th:block>
                                     </td>
                                 </tr>
                                 </tbody>

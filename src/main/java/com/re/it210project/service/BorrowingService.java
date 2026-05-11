@@ -1,6 +1,8 @@
 package com.re.it210project.service;
 
+import com.re.it210project.model.entity.BorrowingDetail;
 import com.re.it210project.model.entity.BorrowingRecord;
+import com.re.it210project.model.entity.MentoringSession;
 
 import java.util.List;
 
@@ -11,5 +13,6 @@ public interface BorrowingService {
     void rejectExport(Long borrowingRecordId);
     List<BorrowingRecord> findAll();
     void returnEquipment(Long recordId);
+    BorrowingRecord createBorrowing(MentoringSession session, List<BorrowingDetail> details);
     
 }

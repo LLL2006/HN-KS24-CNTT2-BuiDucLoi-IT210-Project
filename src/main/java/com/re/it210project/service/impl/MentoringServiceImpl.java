@@ -15,14 +15,12 @@ import com.re.it210project.util.DateTimeUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
 import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
 @RequiredArgsConstructor
 public class MentoringServiceImpl implements MentoringService {
-
     private final MentoringSessionRepository mentoringSessionRepository;
     private final UserRepository userRepository;
     private final LecturerRepository lecturerRepository;
@@ -31,21 +29,16 @@ public class MentoringServiceImpl implements MentoringService {
     @Override
     @Transactional
     public MentoringSession book(MentoringBookingRequest request, Long studentId) {
-
-        // 1. Chuyển đổi ngày/giờ từ request
         LocalDateTime startTime = LocalDateTime.of(
                 request.getSessionDate(),
                 request.getSessionTime()
         );
 
-        // Mặc định mỗi ca tư vấn kéo dài 1 tiếng
         LocalDateTime endTime = startTime.plusHours(1);
 
-        // 2. Chặn đặt lịch trong quá khứ (Yêu cầu CORE-05)
         if (startTime.isBefore(LocalDateTime.now())) {
-            throw new BadRequestException("Không thể đặt lịch ở thời điểm đã qua. Vui lòng chọn thời gian khác!");
+            throw new BadRequestException("Không thể đặt lịch ở thời điểm đã qua. Vui lòng chọn thời gian khác");
         }
-
 
         boolean isConflict = mentoringSessionRepository.existsConflictingSession(
                 request.getLecturerId(),
@@ -55,24 +48,22 @@ public class MentoringServiceImpl implements MentoringService {
         );
 
         if (isConflict) {
-            throw new BadRequestException("Giảng viên đã có lịch hoặc đang trong ca tư vấn khác ở khung giờ này.");
+            throw new BadRequestException("Giảng viên đã có lịch hoặc đang trong ca tư vấn khác ở khung giờ này");
         }
 
-        // 4. Tìm kiếm thông tin thực thể (Validation)
         User student = userRepository.findById(studentId)
                 .orElseThrow(() -> new NotFoundException("Không tìm thấy thông tin sinh viên"));
 
         Lecturer lecturer = lecturerRepository.findById(request.getLecturerId())
                 .orElseThrow(() -> new NotFoundException("Không tìm thấy thông tin giảng viên"));
 
-        // 5. Khởi tạo và lưu phiên tư vấn
         MentoringSession session = MentoringSession.builder()
                 .student(student)
                 .lecturer(lecturer)
                 .topic(request.getTopic())
                 .startTime(startTime)
                 .endTime(endTime)
-                .status(SessionStatus.PENDING) // Trạng thái ban đầu luôn là Chờ xác nhận
+                .status(SessionStatus.PENDING)
                 .createdAt(LocalDateTime.now())
                 .build();
 
@@ -82,7 +73,6 @@ public class MentoringServiceImpl implements MentoringService {
     @Override
     @Transactional
     public void cancel(Long sessionId, Long studentId) {
-
         MentoringSession session = mentoringSessionRepository.findById(sessionId)
                 .orElseThrow(() ->
                         new NotFoundException("Không tìm thấy lịch tư vấn"));
@@ -100,7 +90,6 @@ public class MentoringServiceImpl implements MentoringService {
         }
 
         session.setStatus(SessionStatus.CANCELLED);
-
         mentoringSessionRepository.save(session);
     }
 
@@ -110,10 +99,9 @@ public class MentoringServiceImpl implements MentoringService {
 
     @Override
     public List<MentoringSession> findPendingSessionsForLecturer(Long userId) {
-        // Đừng dùng hàm @Query cũ nữa, dùng hàm Spring Data JPA tự sinh này cho chuẩn
         return mentoringSessionRepository.findByLecturerUserIdAndStatusInOrderByStartTimeDesc(
                 userId,
-                List.of(SessionStatus.PENDING) // Chỉ lấy các ca đang chờ xác nhận
+                List.of(SessionStatus.PENDING)
         );
     }
 
@@ -123,7 +111,6 @@ public class MentoringServiceImpl implements MentoringService {
             Long sessionId,
             Long lecturerId
     ) {
-
         MentoringSession session =
                 mentoringSessionRepository
                         .findById(sessionId)
@@ -149,7 +136,6 @@ public class MentoringServiceImpl implements MentoringService {
         );
 
         if (conflict) {
-
             throw new BadRequestException(
                     "Bạn đã có ca tư vấn trùng thời gian"
             );
@@ -165,7 +151,6 @@ public class MentoringServiceImpl implements MentoringService {
                         );
 
         session.setLecturer(lecturer);
-
         session.setStatus(
                 SessionStatus.CONFIRMED
         );
@@ -174,9 +159,6 @@ public class MentoringServiceImpl implements MentoringService {
     }
 
     public List<MentoringSession> findSessionsForEvaluationPage(Long lecturerId) {
-        // Trả về danh sách các ca thuộc về giảng viên này
-        // và có trạng thái nằm trong danh sách [CONFIRMED, COMPLETED, CANCELLED]
-        // nếu bạn muốn hiện cả ca đã hủy như trong ảnh mẫu.
         return mentoringSessionRepository.findByLecturerUserIdAndStatusInOrderByStartTimeDesc(
                 lecturerId,
                 List.of(SessionStatus.CONFIRMED, SessionStatus.COMPLETED, SessionStatus.CANCELLED)
@@ -186,7 +168,6 @@ public class MentoringServiceImpl implements MentoringService {
     @Override
     @Transactional
     public void rejectSession(Long sessionId, Long lecturerId) {
-
         MentoringSession session = mentoringSessionRepository
                 .findById(sessionId)
                 .orElseThrow(() ->
@@ -205,14 +186,12 @@ public class MentoringServiceImpl implements MentoringService {
         }
 
         session.setStatus(SessionStatus.CANCELLED);
-
         mentoringSessionRepository.save(session);
     }
 
     @Override
     @Transactional
     public void cancelSession(Long sessionId, SessionUser currentUser) {
-
         MentoringSession session = mentoringSessionRepository.findById(sessionId)
                 .orElseThrow(() ->
                         new NotFoundException("Không tìm thấy lịch tư vấn"));
@@ -244,18 +223,14 @@ public class MentoringServiceImpl implements MentoringService {
         }
 
         session.setStatus(SessionStatus.CANCELLED);
-
         mentoringSessionRepository.save(session);
-
         BorrowingRecord borrowing = borrowingRecordRepository
                 .findBySessionId(sessionId)
                 .orElse(null);
 
         if (borrowing != null &&
                 borrowing.getStatus() == BorrowingStatus.PENDING_ALLOCATION) {
-
             borrowing.setStatus(BorrowingStatus.REJECTED);
-
             borrowingRecordRepository.save(borrowing);
         }
     }

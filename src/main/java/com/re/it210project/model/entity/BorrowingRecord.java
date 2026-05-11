@@ -39,15 +39,11 @@ public class BorrowingRecord {
     @Builder.Default
     private List<BorrowingDetail> details = new ArrayList<>();
 
-    // tiền cọc
     private Double depositAmount;
 
-    // tiền bị phạt
     private Double penaltyAmount;
 
-    // hạn phải trả
     private LocalDateTime dueReturnTime;
 
-    // thời gian trả thực tế
     private LocalDateTime actualReturnTime;
 }

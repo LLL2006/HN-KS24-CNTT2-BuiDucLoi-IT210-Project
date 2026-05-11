@@ -29,7 +29,6 @@ public class StudentController {
     private final DepartmentRepository departmentRepository;
     private final LecturerRepository lecturerRepository;
 
-    // Helper lấy sessionUser để sidebar không bị lỗi null
     private SessionUser getSessionUser(HttpSession session) {
         return (SessionUser) session.getAttribute("sessionUser");
     }
@@ -39,12 +38,12 @@ public class StudentController {
         SessionUser user = getSessionUser(session);
         if (user == null) return "redirect:/auth/login";
         model.addAttribute("sessionUser", user);
+
         return "pages/student/dashboard";
     }
 
     @GetMapping("/sessions")
     public String sessions(HttpSession session, Model model) {
-
         SessionUser user =
                 (SessionUser) session.getAttribute("sessionUser");
 
@@ -53,7 +52,6 @@ public class StudentController {
         }
 
         model.addAttribute("sessionUser", user);
-
         model.addAttribute(
                 "sessions",
                 mentoringService.findStudentSessions(user.getId())
@@ -64,7 +62,6 @@ public class StudentController {
 
     @GetMapping("/sessions/book")
     public String bookingPage(HttpSession session, Model model) {
-
         SessionUser user = (SessionUser) session.getAttribute("sessionUser");
         if (user == null) return "redirect:/auth/login";
 
@@ -86,11 +83,9 @@ public class StudentController {
             Model model,
             RedirectAttributes ra
     ) {
-
         SessionUser user = getSessionUser(session);
 
         if (result.hasErrors()) {
-
             model.addAttribute("sessionUser", user);
             model.addAttribute("departments", departmentRepository.findAll());
             model.addAttribute("lecturers",
@@ -100,9 +95,7 @@ public class StudentController {
         }
 
         try {
-
             mentoringService.book(request, user.getId());
-
             ra.addFlashAttribute(
                     "successMsg",
                     "Đặt lịch thành công!"
@@ -111,12 +104,10 @@ public class StudentController {
             return "redirect:/student/sessions";
 
         } catch (BadRequestException e) {
-
             model.addAttribute("sessionUser", user);
             model.addAttribute("departments", departmentRepository.findAll());
             model.addAttribute("lecturers",
                     lecturerRepository.findAllWithUserAndDepartment());
-
             model.addAttribute("errorMsg", e.getMessage());
 
             return "pages/student/book-session";
@@ -129,7 +120,6 @@ public class StudentController {
             HttpSession session,
             RedirectAttributes ra
     ) {
-
         SessionUser sessionUser =
                 (SessionUser) session.getAttribute("sessionUser");
 
@@ -158,7 +148,6 @@ public class StudentController {
         return "pages/student/history";
     }
 
-    // Thêm hàm này vào cuối file StudentController.java của bạn
     @GetMapping("/history/{id}")
     public String evaluationDetail(
             @PathVariable("id") Long sessionId,
@@ -168,8 +157,6 @@ public class StudentController {
         SessionUser user = getSessionUser(session);
         if (user == null) return "redirect:/auth/login";
 
-        // Lấy thông tin chi tiết đánh giá từ Service
-        // Bạn có thể dùng EvaluationService hoặc AcademicHistoryService tùy cấu trúc logic
         model.addAttribute("sessionUser", user);
         model.addAttribute("evaluation", academicHistoryService.getEvaluationDetail(sessionId));
 
@@ -186,7 +173,6 @@ public class StudentController {
         if (user == null) return "redirect:/auth/login";
 
         model.addAttribute("sessionUser", user);
-        // Lấy thông tin đánh giá để có quan hệ sang BorrowingRecord
         model.addAttribute("evaluation", academicHistoryService.getEvaluationDetail(sessionId));
 
         return "pages/student/borrowing-detail";

@@ -107,7 +107,6 @@ public interface MentoringSessionRepository extends JpaRepository<MentoringSessi
 
     long count();
 
-    // Top 5 giảng viên có lượt tư vấn nhiều nhất (Dùng cho biểu đồ)
     @Query("""
     SELECT u.profile.fullName, COUNT(m) 
     FROM MentoringSession m 
@@ -119,7 +118,6 @@ public interface MentoringSessionRepository extends JpaRepository<MentoringSessi
 """)
     List<Object[]> getTop5Lecturers(Pageable pageable);
 
-    // Thống kê số lượng theo trạng thái ca tư vấn (Dùng cho các thẻ màu Dashboard)
     @Query("SELECT m.status, COUNT(m) FROM MentoringSession m GROUP BY m.status")
     List<Object[]> countSessionsByStatus();
 }

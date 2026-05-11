@@ -15,12 +15,10 @@ public class AuthInterceptor implements HandlerInterceptor {
         SessionUser user = (session != null) ? (SessionUser) session.getAttribute("sessionUser") : null;
         String uri = request.getRequestURI();
 
-        // 1. Cho phép Static Resources
         if (uri.startsWith("/css/") || uri.startsWith("/js/") || uri.startsWith("/images/") || uri.equals("/favicon.ico")) {
             return true;
         }
 
-        // 2. Cho phép Auth Pages (Login/Register)
         if (uri.startsWith("/auth/")) {
             if (user != null) {
                 response.sendRedirect("/");
@@ -29,15 +27,13 @@ public class AuthInterceptor implements HandlerInterceptor {
             return true;
         }
 
-        // 3. Kiểm tra đăng nhập
         if (user == null) {
             response.sendRedirect("/auth/login");
             return false;
         }
 
-        // 4. PHÂN QUYỀN TẬP TRUNG (Authorization) - PHẦN QUAN TRỌNG CỦA HƯỚNG 2
         if (uri.startsWith("/admin/") && user.getRole() != Role.ADMIN) {
-            response.sendRedirect("/access-denied"); // Trang báo lỗi 403
+            response.sendRedirect("/access-denied");
             return false;
         }
 

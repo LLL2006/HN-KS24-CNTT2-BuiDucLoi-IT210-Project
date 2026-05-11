@@ -26,12 +26,11 @@ public class WebConfig implements WebMvcConfigurer {
                         "/css/**",
                         "/js/**",
                         "/images/**",
-                        "/favicon.ico", // THÊM DÒNG NÀY ĐỂ INTERCEPTOR BỎ QUA
+                        "/favicon.ico",
                         "/error/**"
                 );
     }
 
-    // THÊM ĐOẠN NÀY nếu static resources không load
     @Override
     public void addResourceHandlers(ResourceHandlerRegistry registry) {
         registry.addResourceHandler("/css/**")

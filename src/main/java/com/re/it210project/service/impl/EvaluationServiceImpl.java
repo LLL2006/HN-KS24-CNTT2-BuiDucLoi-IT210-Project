@@ -6,22 +6,17 @@ import com.re.it210project.model.dto.EvaluationRequest;
 import com.re.it210project.model.entity.*;
 import com.re.it210project.model.enums.BorrowingStatus;
 import com.re.it210project.model.enums.SessionStatus;
-import com.re.it210project.repository.EquipmentRepository;
-import com.re.it210project.repository.MentoringSessionRepository;
-import com.re.it210project.repository.BorrowingRecordRepository;
-import com.re.it210project.repository.AcademicEvaluationRepository;
+import com.re.it210project.repository.*;
 import com.re.it210project.service.EvaluationService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 
 @Service
 @RequiredArgsConstructor
 public class EvaluationServiceImpl implements EvaluationService {
-
     private final MentoringSessionRepository mentoringSessionRepository;
     private final AcademicEvaluationRepository academicEvaluationRepository;
     private final BorrowingRecordRepository borrowingRecordRepository;
@@ -50,17 +45,15 @@ public class EvaluationServiceImpl implements EvaluationService {
                 .abilityLevel(request.getAbilityLevel())
                 .createdAt(LocalDateTime.now())
                 .build();
-
         academicEvaluationRepository.save(evaluation);
 
         if (request.getEquipments() != null && !request.getEquipments().isEmpty()) {
-            double totalDeposit = 0; // Khởi tạo tổng tiền cọc
-
+            double totalDeposit = 0;
             BorrowingRecord borrowingRecord = BorrowingRecord.builder()
                     .session(session)
                     .status(BorrowingStatus.PENDING_ALLOCATION)
                     .createdAt(LocalDateTime.now())
-                    .details(new ArrayList<>()) // Đảm bảo list không null
+                    .details(new ArrayList<>())
                     .build();
 
             for (EvaluationRequest.EquipmentItem item : request.getEquipments()) {
@@ -69,12 +62,6 @@ public class EvaluationServiceImpl implements EvaluationService {
                 Equipment equipment = equipmentRepository.findById(item.getEquipmentId())
                         .orElseThrow(() -> new NotFoundException("Không tìm thấy thiết bị"));
 
-                // VALIDATE TỒN KHO: Nếu thiếu sẽ ném lỗi ngay
-                if (equipment.getQuantity() < item.getQuantity()) {
-                    throw new BadRequestException("Thiết bị [" + equipment.getName() + "] không đủ tồn kho (Hiện có: " + equipment.getQuantity() + ")");
-                }
-
-                // TÍNH TOÁN: Tổng tiền = Đơn giá cọc * Số lượng
                 if (equipment.getDepositAmount() != null) {
                     totalDeposit += (equipment.getDepositAmount() * item.getQuantity());
                 }
@@ -84,11 +71,10 @@ public class EvaluationServiceImpl implements EvaluationService {
                         .quantity(item.getQuantity())
                         .borrowingRecord(borrowingRecord)
                         .build();
-
                 borrowingRecord.getDetails().add(detail);
             }
 
-            borrowingRecord.setDepositAmount(totalDeposit); // Gán tổng tiền vào record
+            borrowingRecord.setDepositAmount(totalDeposit);
             borrowingRecordRepository.save(borrowingRecord);
         }
     }

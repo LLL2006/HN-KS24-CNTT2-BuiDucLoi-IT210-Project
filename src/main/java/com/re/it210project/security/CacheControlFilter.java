@@ -12,7 +12,6 @@ public class CacheControlFilter implements Filter {
             throws IOException, ServletException {
         HttpServletResponse httpResponse = (HttpServletResponse) response;
 
-        // Thiết lập Header chống Cache cho TẤT CẢ các phản hồi từ Server
         httpResponse.setHeader("Cache-Control", "no-cache, no-store, must-revalidate");
         httpResponse.setHeader("Pragma", "no-cache");
         httpResponse.setDateHeader("Expires", 0);

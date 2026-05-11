@@ -21,9 +21,15 @@ public class Department {
     @Column(nullable = false, unique = true, length = 150)
     private String name;
 
+    @Column(unique = true, length = 20)
+    private String code;
+
     @OneToMany(mappedBy = "department")
     private List<UserProfile> userProfiles;
 
     @OneToMany(mappedBy = "department")
     private List<Lecturer> lecturers;
+
+    @OneToMany(mappedBy = "department")
+    private List<LabRoom> labRooms;
 }

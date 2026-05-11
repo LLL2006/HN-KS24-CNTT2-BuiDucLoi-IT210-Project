@@ -21,7 +21,6 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 @RequestMapping("/auth")
 @RequiredArgsConstructor
 public class AuthController {
-
     private final AuthService authService;
     private final DepartmentRepository departmentRepository;
 
@@ -30,14 +29,13 @@ public class AuthController {
         if (!model.containsAttribute("authRequest")) {
             model.addAttribute("authRequest", new AuthRequest());
         }
+
         return "pages/auth/login";
     }
 
     @PostMapping("/login")
     public String login(@Valid @ModelAttribute("authRequest") AuthRequest request,
                         BindingResult result, HttpSession session, Model model) {
-
-
         if (result.hasErrors()) return "pages/auth/login";
 
         try {
@@ -52,7 +50,6 @@ public class AuthController {
 
     @GetMapping("/register")
     public String registerPage(Model model) {
-
         if (!model.containsAttribute("registerRequest")) {
             model.addAttribute("registerRequest", new RegisterRequest());
         }
@@ -68,16 +65,13 @@ public class AuthController {
             BindingResult result,
             Model model,
             RedirectAttributes ra) {
-
         if (result.hasErrors()) {
             model.addAttribute("departments", departmentRepository.findAll());
             return "pages/auth/register";
         }
 
         try {
-
             authService.register(request);
-
             ra.addFlashAttribute(
                     "success",
                     "Đăng ký thành công! Hãy đăng nhập.");
@@ -85,7 +79,6 @@ public class AuthController {
             return "redirect:/auth/login";
 
         } catch (RuntimeException e) {
-
             model.addAttribute("error", e.getMessage());
             model.addAttribute("departments", departmentRepository.findAll());
 
@@ -95,7 +88,6 @@ public class AuthController {
 
     @GetMapping("/logout")
     public String logout(HttpSession session) {
-
         session.invalidate();
 
         return "redirect:/auth/login";

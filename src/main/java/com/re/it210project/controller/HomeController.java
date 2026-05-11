@@ -12,7 +12,6 @@ public class HomeController {
 
     @GetMapping("/")
     public String home(HttpSession session) {
-
         SessionUser user =
                 (SessionUser) session.getAttribute("sessionUser");
 
@@ -35,6 +34,6 @@ public class HomeController {
     public String accessDenied(HttpSession session, Model model) {
         SessionUser user = (SessionUser) session.getAttribute("sessionUser");
         model.addAttribute("sessionUser", user);
-        return "error/403"; // Trả về file 403.html trong thư mục pages/error/
+        return "error/403";
     }
 }

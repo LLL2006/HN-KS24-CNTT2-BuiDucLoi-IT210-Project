@@ -28,14 +28,11 @@ public class ProfileController {
             HttpSession session,
             Model model
     ) {
-
         SessionUser sessionUser =
                 (SessionUser) session.getAttribute("sessionUser");
-
         User user = userRepository.findById(sessionUser.getId())
                 .orElseThrow(() ->
                         new RuntimeException("Không tìm thấy user"));
-
         UserProfile profile = userProfileRepository
                 .findByUserId(sessionUser.getId())
                 .orElseThrow(() ->
@@ -53,14 +50,11 @@ public class ProfileController {
             HttpSession session,
             Model model
     ) {
-
         SessionUser sessionUser =
                 (SessionUser) session.getAttribute("sessionUser");
-
         UserProfile profile = userProfileRepository
                 .findByUserId(sessionUser.getId())
                 .orElseThrow();
-
         ProfileUpdateRequest request =
                 new ProfileUpdateRequest();
 
@@ -83,7 +77,6 @@ public class ProfileController {
             HttpSession session,
             RedirectAttributes ra
     ) {
-
         SessionUser sessionUser =
                 (SessionUser) session.getAttribute("sessionUser");
 
@@ -100,14 +93,11 @@ public class ProfileController {
         profile.setAddress(request.getAddress());
 
         userProfileRepository.save(profile);
-
         sessionUser.setFullName(request.getFullName());
-
         session.setAttribute("sessionUser", sessionUser);
-
         ra.addFlashAttribute(
                 "successMsg",
-                "Cập nhật hồ sơ thành công!"
+                "Cập nhật hồ sơ thành công"
         );
 
         return "redirect:/profile";

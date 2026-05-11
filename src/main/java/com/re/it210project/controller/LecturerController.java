@@ -33,7 +33,6 @@ public class LecturerController {
             Model model,
             HttpSession session
     ) {
-
         SessionUser user =
                 (SessionUser) session.getAttribute("sessionUser");
 
@@ -41,7 +40,6 @@ public class LecturerController {
                 "sessionUser",
                 user
         );
-
         model.addAttribute(
                 "sessions",
                 mentoringService.findPendingSessionsForLecturer(user.getId())
@@ -55,7 +53,6 @@ public class LecturerController {
         SessionUser user = (SessionUser) session.getAttribute("sessionUser");
         model.addAttribute("sessionUser", user);
 
-        // Lấy đúng 1 đối tượng session duy nhất để hiển thị chi tiết [cite: 62]
         MentoringSession mentoringSession = mentoringService.findById(id);
         model.addAttribute("s", mentoringSession);
 
@@ -68,10 +65,8 @@ public class LecturerController {
             HttpSession session,
             RedirectAttributes ra
     ) {
-
         SessionUser user =
                 (SessionUser) session.getAttribute("sessionUser");
-
         mentoringService.rejectSession(
                 id,
                 user.getId()
@@ -91,7 +86,6 @@ public class LecturerController {
             HttpSession session,
             Model model
     ) {
-
         SessionUser user =
                 (SessionUser) session.getAttribute("sessionUser");
 
@@ -99,12 +93,10 @@ public class LecturerController {
         request.setSessionId(id);
 
         model.addAttribute("sessionUser", user);
-
         model.addAttribute(
                 "evaluationRequest",
                 request
         );
-
         model.addAttribute(
                 "equipments",
                 equipmentService.findActive()
@@ -131,21 +123,20 @@ public class LecturerController {
 
         try {
             evaluationService.completeEvaluation(request, user.getId());
-            ra.addFlashAttribute("success", "Đã lưu đánh giá thành công!");
-            return "redirect:/lecturer/sessions";
+            ra.addFlashAttribute("success", "Đã lưu đánh giá thành công");
+            return "redirect:/lecturer/evaluations";
 
         } catch (BadRequestException e) {
-            // KHÔNG DÙNG REDIRECT KHI LỖI LOGIC ĐỂ GIỮ DỮ LIỆU
             model.addAttribute("error", e.getMessage());
             model.addAttribute("equipments", equipmentService.findActive());
-            // Giữ nguyên request để các ô input không bị trống
             model.addAttribute("evaluationRequest", request);
-            return "pages/lecturer/evaluate";
 
+            return "pages/lecturer/evaluate";
         } catch (Exception e) {
             e.printStackTrace();
             model.addAttribute("error", "Lỗi hệ thống: " + e.getMessage());
             model.addAttribute("equipments", equipmentService.findActive());
+
             return "pages/lecturer/evaluate";
         }
     }
@@ -154,11 +145,7 @@ public class LecturerController {
     public String evaluations(HttpSession session, Model model) {
         SessionUser user =
                 (SessionUser) session.getAttribute("sessionUser");
-
         model.addAttribute("sessionUser", user);
-
-        // Tìm các ca có trạng thái CONFIRMED hoặc COMPLETED
-        // Bạn nên tạo một hàm mới trong MentoringService để lấy cả 2 trạng thái này
         model.addAttribute("sessions",
                 mentoringService.findSessionsForEvaluationPage(user.getId())
         );
@@ -171,12 +158,10 @@ public class LecturerController {
             HttpSession session,
             Model model
     ) {
-
         SessionUser user =
                 (SessionUser) session.getAttribute("sessionUser");
 
         model.addAttribute("sessionUser", user);
-
         model.addAttribute(
                 "pendingCount",
                 mentoringSessionRepository
@@ -185,7 +170,6 @@ public class LecturerController {
                                 SessionStatus.PENDING
                         )
         );
-
         model.addAttribute(
                 "confirmedCount",
                 mentoringSessionRepository
@@ -194,7 +178,6 @@ public class LecturerController {
                                 SessionStatus.CONFIRMED
                         )
         );
-
         model.addAttribute(
                 "completedCount",
                 mentoringSessionRepository
@@ -214,9 +197,8 @@ public class LecturerController {
             mentoringService.acceptSession(id, user.getId());
             ra.addFlashAttribute("success", "Đã tiếp nhận ca tư vấn");
         } catch (Exception e) {
-            // Log lỗi ra console để debug
             System.err.println("Lỗi tiếp nhận: " + e.getMessage());
-            ra.addFlashAttribute("error", e.getMessage()); // Sẽ hiện thông báo đỏ trên web
+            ra.addFlashAttribute("error", e.getMessage());
         }
         return "redirect:/lecturer/sessions";
     }

@@ -1,16 +1,8 @@
 package com.re.it210project.config;
 
-import com.re.it210project.model.entity.Department;
-import com.re.it210project.model.entity.Equipment;
-import com.re.it210project.model.entity.Lecturer;
-import com.re.it210project.model.entity.User;
-import com.re.it210project.model.entity.UserProfile;
+import com.re.it210project.model.entity.*;
 import com.re.it210project.model.enums.Role;
-import com.re.it210project.repository.DepartmentRepository;
-import com.re.it210project.repository.EquipmentRepository;
-import com.re.it210project.repository.LecturerRepository;
-import com.re.it210project.repository.UserProfileRepository;
-import com.re.it210project.repository.UserRepository;
+import com.re.it210project.repository.*;
 import com.re.it210project.security.PasswordUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.CommandLineRunner;
@@ -18,6 +10,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 @Component
@@ -29,39 +22,24 @@ public class DataSeeder implements CommandLineRunner {
     private final UserProfileRepository userProfileRepository;
     private final LecturerRepository lecturerRepository;
     private final EquipmentRepository equipmentRepository;
+    private final LabRoomRepository labRoomRepository;
 
     @Override
     @Transactional
     public void run(String... args) {
-        seedDepartments();
+        if (departmentRepository.count() > 0) return;
+
         seedAdmin();
-        seedLecturers();
+        seedDataByDepartment();
         seedEquipments();
     }
 
-    private void seedDepartments() {
-        if (departmentRepository.count() > 0) {
-            return;
-        }
-
-        List<Department> departments = List.of(
-                Department.builder().name("Công nghệ thông tin").build(),
-                Department.builder().name("Kỹ thuật phần mềm").build(),
-                Department.builder().name("Hệ thống thông tin").build(),
-                Department.builder().name("Mạng máy tính").build()
-        );
-
-        departmentRepository.saveAll(departments);
-    }
-
     private void seedAdmin() {
-        if (userRepository.existsByUsername("admin")) {
-            return;
-        }
+        if (userRepository.existsByUsername("admin")) return;
 
         User admin = User.builder()
                 .username("admin")
-                .email("admin@example.com")
+                .email("admin@smartlab.com")
                 .passwordHash(PasswordUtil.hash("Admin@123"))
                 .role(Role.ADMIN)
                 .active(true)
@@ -69,50 +47,46 @@ public class DataSeeder implements CommandLineRunner {
                 .build();
 
         User savedAdmin = userRepository.save(admin);
-
-        UserProfile profile = UserProfile.builder()
+        userProfileRepository.save(UserProfile.builder()
                 .user(savedAdmin)
-                .fullName("Quản trị viên")
-                .build();
-
-        userProfileRepository.save(profile);
+                .fullName("Quản trị viên hệ thống")
+                .build());
     }
 
-    private void seedLecturers() {
+    private void seedDataByDepartment() {
+        String[][] deptData = {
+                {"Công nghệ thông tin", "CNTT", "Phòng Lab AI & Big Data", "A2-301", "Nguyễn Văn CNTT", "AI/ML Specialist"},
+                {"Kỹ thuật phần mềm", "KTPM", "Phòng Lab Software Engineering", "A2-302", "Trần Văn Phần Mềm", "Clean Code & Testing"},
+                {"Hệ thống thông tin", "HTTT", "Phòng Lab Database Systems", "B1-205", "Lê Thị Hệ Thống", "Data Architect"},
+                {"Mạng máy tính", "MMT", "Phòng Lab Network & Security", "B1-206", "Phạm Văn Mạng", "Cyber Security"}
+        };
 
-        if (userRepository.existsByUsername("lecturer1")) {
-            return;
+        for (int i = 0; i < deptData.length; i++) {
+            Department dept = Department.builder()
+                    .name(deptData[i][0])
+                    .code(deptData[i][1])
+                    .build();
+            dept = departmentRepository.save(dept);
+
+            LabRoom lab = LabRoom.builder()
+                    .name(deptData[i][2])
+                    .roomNumber(deptData[i][3])
+                    .department(dept)
+                    .build();
+            labRoomRepository.save(lab);
+
+            String username = "lecturer_" + deptData[i][1].toLowerCase();
+            createLecturer(
+                    username,
+                    username + "@smartlab.com",
+                    deptData[i][4],
+                    deptData[i][5],
+                    dept
+            );
         }
-
-        Department department = departmentRepository.findAll()
-                .stream()
-                .findFirst()
-                .orElseThrow();
-
-        createLecturer(
-                "lecturer1",
-                "lecturer1@example.com",
-                "Nguyễn Văn A",
-                "Java Web, Spring Boot",
-                department
-        );
-
-        createLecturer(
-                "lecturer2",
-                "lecturer2@example.com",
-                "Trần Thị B",
-                "Database, System Design",
-                department
-        );
     }
 
-    private void createLecturer(
-            String username,
-            String email,
-            String fullName,
-            String specialization,
-            Department department
-    ) {
+    private void createLecturer(String username, String email, String fullName, String spec, Department dept) {
         User user = User.builder()
                 .username(username)
                 .email(email)
@@ -124,86 +98,27 @@ public class DataSeeder implements CommandLineRunner {
 
         User savedUser = userRepository.save(user);
 
-        UserProfile profile = UserProfile.builder()
+        userProfileRepository.save(UserProfile.builder()
                 .user(savedUser)
                 .fullName(fullName)
-                .department(department)
-                .build();
+                .department(dept)
+                .build());
 
-        userProfileRepository.save(profile);
-
-        Lecturer lecturer = Lecturer.builder()
+        lecturerRepository.save(Lecturer.builder()
                 .user(savedUser)
-                .department(department)
-                .specialization(specialization)
-                .build();
-
-        lecturerRepository.save(lecturer);
+                .department(dept)
+                .specialization(spec)
+                .build());
     }
 
     private void seedEquipments() {
-
-        if (equipmentRepository.count() > 0) {
-            return;
-        }
+        if (equipmentRepository.count() > 0) return;
 
         List<Equipment> equipments = List.of(
-
-                Equipment.builder()
-                        .name("Kit Arduino Uno")
-                        .description("Bộ kit thực hành Arduino cơ bản")
-                        .quantity(20)
-                        .active(true)
-                        .requiresDeposit(false)
-                        .depositAmount(0.0)
-                        .build(),
-
-                Equipment.builder()
-                        .name("Raspberry Pi")
-                        .description("Thiết bị thực hành IoT")
-                        .quantity(10)
-                        .active(true)
-                        .requiresDeposit(false)
-                        .depositAmount(0.0)
-                        .build(),
-
-                Equipment.builder()
-                        .name("Tài liệu Java Web")
-                        .description("Tài liệu thực hành Java Web")
-                        .quantity(50)
-                        .active(true)
-                        .requiresDeposit(false)
-                        .depositAmount(0.0)
-                        .build(),
-
-                Equipment.builder()
-                        .name("Meta Quest 3 VR")
-                        .description("Thiết bị VR cao cấp")
-                        .quantity(2)
-                        .active(true)
-                        .requiresDeposit(true)
-                        .depositAmount(3000000.0)
-                        .build(),
-
-                Equipment.builder()
-                        .name("DJI Mini Drone")
-                        .description("Drone nghiên cứu AI")
-                        .quantity(1)
-                        .active(true)
-                        .requiresDeposit(true)
-                        .depositAmount(5000000.0)
-                        .build(),
-
-                Equipment.builder()
-                        .name("Macbook Pro M3")
-                        .description("Laptop phục vụ AI")
-                        .quantity(3)
-                        .active(true)
-                        .requiresDeposit(true)
-                        .depositAmount(7000000.0)
-                        .build()
+                Equipment.builder().name("Kit Arduino Uno").quantity(20).active(true).requiresDeposit(false).depositAmount(0.0).build(),
+                Equipment.builder().name("Macbook Pro M3").quantity(5).active(true).requiresDeposit(true).depositAmount(7000000.0).build(),
+                Equipment.builder().name("DJI Mini Drone").quantity(2).active(true).requiresDeposit(true).depositAmount(5000000.0).build()
         );
-
         equipmentRepository.saveAll(equipments);
     }
 }
