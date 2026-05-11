@@ -1,5 +1,6 @@
 package com.re.it210project.service.impl;
 
+import com.re.it210project.exception.NotFoundException;
 import com.re.it210project.model.dto.AcademicHistoryResponse;
 import com.re.it210project.model.entity.AcademicEvaluation;
 import com.re.it210project.model.entity.BorrowingDetail;
@@ -38,15 +39,23 @@ public class AcademicHistoryServiceImpl implements AcademicHistoryService {
     }
 
     private AcademicHistoryResponse toHistoryResponse(MentoringSession session) {
-        AcademicEvaluation evaluation = academicEvaluationRepository.findBySessionId(session.getId())
-                .orElse(null);
 
-        BorrowingRecord borrowingRecord = borrowingRecordRepository.findBySessionId(session.getId())
-                .orElse(null);
+        AcademicEvaluation evaluation =
+                academicEvaluationRepository
+                        .findBySessionId(session.getId())
+                        .orElse(null);
 
-        List<AcademicHistoryResponse.BorrowedEquipment> equipments = Collections.emptyList();
+        BorrowingRecord borrowingRecord =
+                borrowingRecordRepository
+                        .findBySessionId(session.getId())
+                        .orElse(null);
 
-        if (borrowingRecord != null && borrowingRecord.getDetails() != null) {
+        List<AcademicHistoryResponse.BorrowedEquipment> equipments =
+                Collections.emptyList();
+
+        if (borrowingRecord != null &&
+                borrowingRecord.getDetails() != null) {
+
             equipments = borrowingRecord.getDetails()
                     .stream()
                     .map(this::toBorrowedEquipment)
@@ -55,15 +64,41 @@ public class AcademicHistoryServiceImpl implements AcademicHistoryService {
 
         String lecturerName = session.getLecturer()
                 .getUser()
-                .getUsername();
+                .getProfile()
+                .getFullName();
+
+        String departmentName = session.getLecturer()
+                .getDepartment()
+                .getName();
 
         return AcademicHistoryResponse.builder()
+
                 .sessionId(session.getId())
+
                 .lecturerName(lecturerName)
+
+                .departmentName(departmentName)
+
+                .topic(session.getTopic())
+
                 .startTime(session.getStartTime())
-                .evaluationContent(evaluation != null ? evaluation.getContent() : null)
-                .abilityLevel(evaluation != null ? evaluation.getAbilityLevel() : null)
+
+                .status(session.getStatus())
+
+                .evaluationContent(
+                        evaluation != null
+                                ? evaluation.getContent()
+                                : null
+                )
+
+                .abilityLevel(
+                        evaluation != null
+                                ? evaluation.getAbilityLevel()
+                                : null
+                )
+
                 .borrowedEquipments(equipments)
+
                 .build();
     }
 
@@ -72,5 +107,12 @@ public class AcademicHistoryServiceImpl implements AcademicHistoryService {
                 .equipmentName(detail.getEquipment().getName())
                 .quantity(detail.getQuantity())
                 .build();
+    }
+
+    @Override
+    public AcademicEvaluation getEvaluationDetail(Long sessionId) {
+
+        return academicEvaluationRepository.findBySessionId(sessionId)
+                .orElseThrow(() -> new NotFoundException("Không tìm thấy thông tin đánh giá cho buổi tư vấn này."));
     }
 }

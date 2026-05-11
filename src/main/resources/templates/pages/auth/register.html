@@ -56,8 +56,11 @@
           <div class="row">
             <div class="col-md-6 form-group">
               <label><i class="fas fa-user mr-1"></i> Tên đăng nhập</label>
-              <input type="text" th:field="*{username}" class="form-control" th:classappend="${#fields.hasErrors('username')} ? 'is-invalid'" placeholder="Ví dụ: loi.thang">
-              <small class="error-text" th:if="${#fields.hasErrors('username')}" th:errors="*{username}"></small>
+              <input type="text" th:field="*{username}" class="form-control"
+                     th:classappend="${#fields.hasErrors('username')} ? 'is-invalid'" placeholder="Ví dụ: loi.thang">
+
+              <small class="text-danger small" th:if="${#fields.hasErrors('username')}"
+                     th:text="${#fields.errors('username')[0]}"></small>
             </div>
             <div class="col-md-6 form-group">
               <label><i class="fas fa-envelope mr-1"></i> Email sinh viên</label>
@@ -68,8 +71,11 @@
           <div class="row">
             <div class="col-md-6 form-group">
               <label><i class="fas fa-key mr-1"></i> Mật khẩu</label>
-              <input type="password" th:field="*{password}" class="form-control" th:classappend="${#fields.hasErrors('password')} ? 'is-invalid'" placeholder="********">
-              <small class="error-text" th:if="${#fields.hasErrors('password')}" th:errors="*{password}"></small>
+              <input type="password" th:field="*{password}" class="form-control"
+                     th:classappend="${#fields.hasErrors('password')} ? 'is-invalid'" placeholder="********">
+
+              <small class="text-danger small" th:if="${#fields.hasErrors('password')}"
+                     th:text="${#fields.errors('password')[0]}"></small>
             </div>
             <div class="col-md-6 form-group">
               <label><i class="fas fa-id-card mr-1"></i> Họ và tên</label>

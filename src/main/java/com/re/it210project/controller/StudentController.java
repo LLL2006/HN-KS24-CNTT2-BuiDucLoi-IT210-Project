@@ -123,6 +123,30 @@ public class StudentController {
         }
     }
 
+    @PostMapping("/sessions/{id}/cancel")
+    public String cancelSession(
+            @PathVariable Long id,
+            HttpSession session,
+            RedirectAttributes ra
+    ) {
+
+        SessionUser sessionUser =
+                (SessionUser) session.getAttribute("sessionUser");
+
+        if (sessionUser == null) {
+            return "redirect:/auth/login";
+        }
+
+        mentoringService.cancelSession(id, sessionUser);
+
+        ra.addFlashAttribute(
+                "successMsg",
+                "Đã hủy lịch tư vấn!"
+        );
+
+        return "redirect:/student/sessions";
+    }
+
     @GetMapping("/history")
     public String history(HttpSession session, Model model) {
         SessionUser user = getSessionUser(session);
@@ -132,5 +156,39 @@ public class StudentController {
         model.addAttribute("active", "history");
         model.addAttribute("histories", academicHistoryService.getStudentHistory(user.getId()));
         return "pages/student/history";
+    }
+
+    // Thêm hàm này vào cuối file StudentController.java của bạn
+    @GetMapping("/history/{id}")
+    public String evaluationDetail(
+            @PathVariable("id") Long sessionId,
+            HttpSession session,
+            Model model
+    ) {
+        SessionUser user = getSessionUser(session);
+        if (user == null) return "redirect:/auth/login";
+
+        // Lấy thông tin chi tiết đánh giá từ Service
+        // Bạn có thể dùng EvaluationService hoặc AcademicHistoryService tùy cấu trúc logic
+        model.addAttribute("sessionUser", user);
+        model.addAttribute("evaluation", academicHistoryService.getEvaluationDetail(sessionId));
+
+        return "pages/student/evaluation-detail";
+    }
+
+    @GetMapping("/history/{id}/borrowing")
+    public String borrowingDetail(
+            @PathVariable("id") Long sessionId,
+            HttpSession session,
+            Model model
+    ) {
+        SessionUser user = getSessionUser(session);
+        if (user == null) return "redirect:/auth/login";
+
+        model.addAttribute("sessionUser", user);
+        // Lấy thông tin đánh giá để có quan hệ sang BorrowingRecord
+        model.addAttribute("evaluation", academicHistoryService.getEvaluationDetail(sessionId));
+
+        return "pages/student/borrowing-detail";
     }
 }

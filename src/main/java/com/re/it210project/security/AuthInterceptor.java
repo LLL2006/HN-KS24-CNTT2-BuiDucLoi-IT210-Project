@@ -1,5 +1,7 @@
 package com.re.it210project.security;
 
+import com.re.it210project.model.entity.SessionUser;
+import com.re.it210project.model.enums.Role;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
@@ -10,30 +12,42 @@ public class AuthInterceptor implements HandlerInterceptor {
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
         HttpSession session = request.getSession(false);
-        boolean isLoggedIn = (session != null && session.getAttribute("sessionUser") != null);
+        SessionUser user = (session != null) ? (SessionUser) session.getAttribute("sessionUser") : null;
         String uri = request.getRequestURI();
 
-        // 1. Cho phép tài nguyên tĩnh VÀ favicon
+        // 1. Cho phép Static Resources
         if (uri.startsWith("/css/") || uri.startsWith("/js/") || uri.startsWith("/images/") || uri.equals("/favicon.ico")) {
             return true;
         }
 
-        // 2. Cho phép trang Login/Register
-        if (uri.equals("/auth/login") || uri.equals("/auth/register")) {
-            if (isLoggedIn) {
+        // 2. Cho phép Auth Pages (Login/Register)
+        if (uri.startsWith("/auth/")) {
+            if (user != null) {
                 response.sendRedirect("/");
                 return false;
             }
             return true;
         }
 
-        // 3. Nếu chưa đăng nhập thì mới chặn
-        if (!isLoggedIn) {
-            // Kiểm tra xem có phải đang gửi dữ liệu lên không, nếu POST thì cho qua để Controller xử lý
-            if ("POST".equalsIgnoreCase(request.getMethod())) {
-                return true;
-            }
+        // 3. Kiểm tra đăng nhập
+        if (user == null) {
             response.sendRedirect("/auth/login");
+            return false;
+        }
+
+        // 4. PHÂN QUYỀN TẬP TRUNG (Authorization) - PHẦN QUAN TRỌNG CỦA HƯỚNG 2
+        if (uri.startsWith("/admin/") && user.getRole() != Role.ADMIN) {
+            response.sendRedirect("/access-denied"); // Trang báo lỗi 403
+            return false;
+        }
+
+        if (uri.startsWith("/lecturer/") && user.getRole() != Role.LECTURER) {
+            response.sendRedirect("/access-denied");
+            return false;
+        }
+
+        if (uri.startsWith("/student/") && user.getRole() != Role.STUDENT) {
+            response.sendRedirect("/access-denied");
             return false;
         }
 

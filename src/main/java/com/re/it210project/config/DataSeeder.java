@@ -92,7 +92,7 @@ public class DataSeeder implements CommandLineRunner {
         createLecturer(
                 "lecturer1",
                 "lecturer1@example.com",
-                "Giảng viên 1",
+                "Nguyễn Văn A",
                 "Java Web, Spring Boot",
                 department
         );
@@ -100,7 +100,7 @@ public class DataSeeder implements CommandLineRunner {
         createLecturer(
                 "lecturer2",
                 "lecturer2@example.com",
-                "Giảng viên 2",
+                "Trần Thị B",
                 "Database, System Design",
                 department
         );
@@ -142,28 +142,65 @@ public class DataSeeder implements CommandLineRunner {
     }
 
     private void seedEquipments() {
+
         if (equipmentRepository.count() > 0) {
             return;
         }
 
         List<Equipment> equipments = List.of(
+
                 Equipment.builder()
                         .name("Kit Arduino Uno")
                         .description("Bộ kit thực hành Arduino cơ bản")
                         .quantity(20)
                         .active(true)
+                        .requiresDeposit(false)
+                        .depositAmount(0.0)
                         .build(),
+
                 Equipment.builder()
                         .name("Raspberry Pi")
                         .description("Thiết bị thực hành IoT")
                         .quantity(10)
                         .active(true)
+                        .requiresDeposit(false)
+                        .depositAmount(0.0)
                         .build(),
+
                 Equipment.builder()
                         .name("Tài liệu Java Web")
                         .description("Tài liệu thực hành Java Web")
                         .quantity(50)
                         .active(true)
+                        .requiresDeposit(false)
+                        .depositAmount(0.0)
+                        .build(),
+
+                Equipment.builder()
+                        .name("Meta Quest 3 VR")
+                        .description("Thiết bị VR cao cấp")
+                        .quantity(2)
+                        .active(true)
+                        .requiresDeposit(true)
+                        .depositAmount(3000000.0)
+                        .build(),
+
+                Equipment.builder()
+                        .name("DJI Mini Drone")
+                        .description("Drone nghiên cứu AI")
+                        .quantity(1)
+                        .active(true)
+                        .requiresDeposit(true)
+                        .depositAmount(5000000.0)
+                        .build(),
+
+                Equipment.builder()
+                        .name("Macbook Pro M3")
+                        .description("Laptop phục vụ AI")
+                        .quantity(3)
+                        .active(true)
+                        .requiresDeposit(true)
+                        .depositAmount(7000000.0)
                         .build()
         );
 

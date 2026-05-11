@@ -36,10 +36,16 @@ public class MentoringSession {
     @Column(nullable = false)
     private LocalDateTime endTime;
 
+    @OneToOne(mappedBy = "session")
+    private AcademicEvaluation evaluation;
+
     @Builder.Default
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 30)
     private SessionStatus status = SessionStatus.PENDING;
+
+    @OneToOne(mappedBy = "session")
+    private BorrowingRecord borrowingRecord;
 
     private LocalDateTime createdAt;
 }

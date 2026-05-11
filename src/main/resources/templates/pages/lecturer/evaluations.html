@@ -1,17 +1,17 @@
 <!DOCTYPE html>
 <html lang="vi" xmlns:th="http://www.thymeleaf.org">
 
-<head th:replace="~{layout/main-layout :: head('Ca tư vấn')}"></head>
+<head th:replace="~{layout/main-layout :: head('Đánh giá sinh viên')}"></head>
 
 <body class="app-page">
 
-<div th:replace="~{layout/main-layout :: sidebar(${sessionUser.role.name()}, 'sessions')}"></div>
+<div th:replace="~{layout/main-layout :: sidebar(${sessionUser.role.name()}, 'evaluations')}"></div>
 
 <div class="main-content">
 
     <div th:replace="~{layout/main-layout :: topbar(
-        'Ca tư vấn',
-        'Quản lý và tiếp nhận các buổi hỗ trợ học thuật')}">
+        'Đánh giá sinh viên',
+        'Danh sách các ca cần đánh giá')}">
     </div>
 
     <div class="container-fluid mt-4">
@@ -19,12 +19,14 @@
         <div th:replace="~{layout/main-layout :: alerts}"></div>
 
         <div class="row">
+
             <div class="col-12">
+
                 <div class="app-card shadow-sm border-0">
                     <div class="card-body p-4">
                         <div class="d-flex justify-content-between align-items-center mb-4">
                             <h4 class="mb-0 text-primary font-weight-bold">
-                                <i class="fas fa-calendar-check mr-2"></i>Danh sách ca tư vấn
+                                <i class="fas fa-calendar-check mr-2"></i>Quản lý đánh giá
                             </h4>
                         </div>
 
@@ -36,7 +38,7 @@
                                     <th>Chủ đề</th>
                                     <th>Thời gian</th>
                                     <th>Trạng thái</th>
-                                    <th width="220" class="text-center">Thao tác</th>
+                                    <th width="200" class="text-center">Thao tác</th>
                                 </tr>
                                 </thead>
 
@@ -70,32 +72,33 @@
                                     </td>
 
                                     <td>
-                                        <span class="badge px-3 py-2"
-                                              th:classappend="
-                                                ${s.status.name() == 'PENDING'} ? 'badge-warning' :
-                                                (${s.status.name() == 'CONFIRMED'} ? 'badge-primary' :
-                                                (${s.status.name() == 'COMPLETED'} ? 'badge-success' : 'badge-danger'))
-                                              "
-                                              th:text="
-                                                ${s.status.name() == 'PENDING'} ? 'Chờ xác nhận' :
-                                                (${s.status.name() == 'CONFIRMED'} ? 'Đã tiếp nhận' :
-                                                (${s.status.name() == 'COMPLETED'} ? 'Hoàn thành' : 'Đã hủy'))
-                                              ">
-                                        </span>
+                        <span class="badge px-3 py-2"
+                              th:classappend="
+                                ${s.status.name() == 'PENDING'} ? 'badge-warning' :
+                                (${s.status.name() == 'CONFIRMED'} ? 'badge-primary' :
+                                (${s.status.name() == 'COMPLETED'} ? 'badge-success' :
+                                (${s.status.name() == 'CANCELLED'} ? 'badge-danger' : 'badge-secondary')))
+                              "
+                              th:text="
+                                ${s.status.name() == 'PENDING'} ? 'Chờ xác nhận' :
+                                (${s.status.name() == 'CONFIRMED'} ? 'Đã tiếp nhận' :
+                                (${s.status.name() == 'COMPLETED'} ? 'Hoàn thành' : 'Đã hủy'))
+                              ">
+                        </span>
                                     </td>
 
                                     <td class="text-center">
                                         <div class="d-flex justify-content-center flex-wrap" style="gap: 5px;">
 
                                             <form th:if="${s.status.name() == 'PENDING'}"
-                                                  th:action="@{/lecturer/sessions/{id}/accept(id=${s.id})}" method="post" class="m-0">
+                                                  th:action="@{/lecturer/sessions/{id}/accept(id=${s.id})}" method="post">
                                                 <button class="btn btn-sm btn-success">
                                                     <i class="fas fa-check mr-1"></i>Tiếp nhận
                                                 </button>
                                             </form>
 
                                             <form th:if="${s.status.name() == 'PENDING'}"
-                                                  th:action="@{/lecturer/sessions/{id}/reject(id=${s.id})}" method="post" class="m-0">
+                                                  th:action="@{/lecturer/sessions/{id}/reject(id=${s.id})}" method="post">
                                                 <button class="btn btn-sm btn-danger">
                                                     <i class="fas fa-times mr-1"></i>Từ chối
                                                 </button>
@@ -122,9 +125,13 @@
                         </div>
                     </div>
                 </div>
+
             </div>
+
         </div>
+
     </div>
+
 </div>
 
 <div th:replace="~{layout/main-layout :: scripts}"></div>

@@ -1,10 +1,104 @@
 <!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Title</title>
-</head>
-<body>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{layout/main-layout :: head('Chi tiết đánh giá')}"></head>
+<body class="app-page">
+<div th:replace="~{layout/main-layout :: sidebar(${sessionUser.role.name()}, 'evaluations')}"></div>
 
+<div class="main-content">
+    <div th:replace="~{layout/main-layout :: topbar('Kết quả tư vấn', 'Xem lại nội dung đánh giá và thiết bị hỗ trợ')}"></div>
+
+    <div class="container-fluid mt-4">
+        <div class="row">
+            <div class="col-md-4">
+                <div class="app-card shadow-sm border-0 mb-4">
+                    <div class="card-body">
+                        <h5 class="text-primary font-weight-bold mb-3">Thông tin sinh viên</h5>
+                        <p><strong>Họ tên:</strong> <span th:text="${s.student.profile.fullName}"></span></p>
+                        <p><strong>Mã SV:</strong> <span th:text="${s.student.username}"></span></p>
+                        <hr>
+
+                        <h5 class="text-primary font-weight-bold mb-3">Đánh giá năng lực</h5>
+                        <div class="mb-3">
+                            <span class="badge badge-pill px-3 py-2"
+                                  th:classappend="${s.evaluation != null} ? 'badge-info' : 'badge-secondary'"
+                                  th:text="${s.evaluation != null ? s.evaluation.abilityLevel : 'Chưa xếp loại'}">
+                            </span>
+                        </div>
+
+                        <hr>
+                        <h5 class="text-primary font-weight-bold mb-3">Thời gian</h5>
+                        <p><i class="far fa-calendar-alt mr-2"></i>Ngày: <span th:text="${#temporals.format(s.startTime, 'dd/MM/yyyy')}"></span></p>
+                        <p><i class="far fa-clock mr-2"></i>Giờ: <span th:text="${#temporals.format(s.startTime, 'HH:mm')} + ' - ' + ${#temporals.format(s.endTime, 'HH:mm')}"></span></p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-8">
+                <div class="app-card shadow-sm border-0 mb-4">
+                    <div class="card-body">
+                        <h5 class="text-primary font-weight-bold mb-3">Nội dung nhận xét chi tiết</h5>
+                        <div class="p-3 bg-light rounded border mb-4" style="min-height: 120px; white-space: pre-line;">
+                            <p class="text-dark mb-0" th:text="${s.evaluation != null ? s.evaluation.content : 'Không có nhận xét chi tiết.'}"></p>
+                        </div>
+
+                        <h5 class="text-primary font-weight-bold mb-3">Danh sách thiết bị hỗ trợ mượn</h5>
+
+                        <div class="table-responsive" th:if="${s.borrowingRecord != null and !#lists.isEmpty(s.borrowingRecord.details)}">
+                            <table class="table table-hover table-bordered border-0">
+                                <thead class="thead-light">
+                                <tr>
+                                    <th>Tên thiết bị</th>
+                                    <th class="text-center">Số lượng</th>
+                                    <th class="text-right">Tiền đặt cọc</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                <tr th:each="detail : ${s.borrowingRecord.details}">
+                                    <td class="font-weight-bold" th:text="${detail.equipment.name}"></td>
+                                    <td class="text-center" th:text="${detail.quantity}">1</td>
+                                    <td class="text-right">
+            <span th:if="${detail.equipment.depositAmount != null and detail.equipment.depositAmount > 0}"
+                  th:text="${#numbers.formatDecimal(detail.equipment.depositAmount, 0, 'COMMA', 0, 'POINT')} + ' VNĐ'"
+                  class="text-danger font-weight-bold">
+            </span>
+                                        <span th:unless="${detail.equipment.depositAmount != null and detail.equipment.depositAmount > 0}"
+                                              class="text-success small">Không cần đóng
+            </span>
+                                    </td>
+                                </tr>
+                                </tbody>
+
+                                <div class="d-flex justify-content-end mt-3" th:if="${s.borrowingRecord != null and s.borrowingRecord.depositAmount > 0}">
+                                    <div class="text-right">
+                                        <h5 class="text-muted mb-1" style="font-size: 0.9rem;">Tổng tiền đặt cọc cần thanh toán:</h5>
+                                        <h3 class="text-danger font-weight-bold"
+                                            th:text="${#numbers.formatDecimal(s.borrowingRecord.depositAmount, 0, 'COMMA', 0, 'POINT')} + ' VNĐ'">
+                                        </h3>
+                                    </div>
+                                </div>
+                            </table>
+                            <div class="alert alert-warning mt-2 small" th:if="${s.borrowingRecord.depositAmount > 0}">
+                                <i class="fas fa-exclamation-triangle mr-1"></i>
+                                Sinh viên cần hoàn tất thanh toán tiền cọc để nhận thiết bị.
+                            </div>
+                        </div>
+
+                        <div th:unless="${s.borrowingRecord != null and !#lists.isEmpty(s.borrowingRecord.details)}"
+                             class="text-center py-4 bg-light rounded border-dashed">
+                            <p class="text-muted mb-0 italic">Ca tư vấn này giảng viên không đề xuất thiết bị hỗ trợ.</p>
+                        </div>
+
+                        <div class="mt-5 border-top pt-3">
+                            <a th:href="@{/lecturer/evaluations}" class="btn btn-outline-secondary px-4">
+                                <i class="fas fa-chevron-left mr-2"></i> Quay lại danh sách
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div th:replace="~{layout/main-layout :: scripts}"></div>
 </body>
 </html>

@@ -1,34 +1,203 @@
 <!DOCTYPE html>
-<html lang="vi"
-      xmlns:th="http://www.thymeleaf.org">
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
 
-<head th:replace="~{layout/main-layout :: head('Admin Dashboard')}"></head>
+<head th:replace="~{layout/main-layout :: head('Hệ thống Quản trị - Smart Lab')}"></head>
 
-<body>
+<body class="app-page">
 
 <div th:replace="~{layout/main-layout :: sidebar(${sessionUser.role.name()}, 'dashboard')}"></div>
 
 <div class="main-content">
 
-    <div th:replace="~{layout/main-layout :: topbar('Dashboard','Quản trị hệ thống')}"></div>
+    <div th:replace="~{layout/main-layout :: topbar(
+        'Bảng điều khiển Admin',
+        'Thống kê và giám sát hoạt động hệ thống')}">
+    </div>
 
     <div class="container-fluid mt-4">
 
-        <div class="app-card">
+        <div th:replace="~{layout/main-layout :: alerts}"></div>
 
-            <div class="card-body">
-
-                <h3>Trang quản trị hệ thống</h3>
-
+        <div class="row mb-4">
+            <div class="col-md-3">
+                <div class="app-card shadow-sm border-0 p-3" style="background: linear-gradient(135deg, #4e73df 0%, #224abe 100%); color: white;">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <div class="small opacity-75">Tổng thiết bị</div>
+                            <h2 class="mb-0 font-weight-bold" th:text="${totalEquipments}">0</h2>
+                        </div>
+                        <i class="fas fa-tools fa-2x opacity-25"></i>
+                    </div>
+                </div>
             </div>
 
+            <div class="col-md-3">
+                <div class="app-card shadow-sm border-0 p-3" style="background: linear-gradient(135deg, #f6c23e 0%, #f4b619 100%); color: white;">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <div class="small opacity-75">Phiếu mượn chờ duyệt</div>
+                            <h2 class="mb-0 font-weight-bold" th:text="${pendingSessions}">0</h2>
+                        </div>
+                        <i class="fas fa-file-invoice fa-2x opacity-25"></i>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-3">
+                <div class="app-card shadow-sm border-0 p-3" style="background: linear-gradient(135deg, #1cc88a 0%, #13855c 100%); color: white;">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <div class="small opacity-75">Tổng lịch tư vấn</div> <h2 class="mb-0 font-weight-bold" th:text="${totalSessions}">0</h2>
+                        </div>
+                        <i class="fas fa-calendar-check fa-2x opacity-25"></i> </div>
+                </div>
+            </div>
+
+            <div class="col-md-3">
+                <div class="app-card shadow-sm border-0 p-3" style="background: linear-gradient(135deg, #e74a3b 0%, #be2617 100%); color: white;">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <div class="small opacity-75">Cảnh báo hết hàng</div>
+                            <h2 class="mb-0 font-weight-bold" th:text="${#lists.size(lowStockEquipments)}">0</h2>
+                        </div>
+                        <i class="fas fa-exclamation-circle fa-2x opacity-25"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="app-card shadow-sm border-0">
+                    <div class="card-body p-4">
+                        <h5 class="font-weight-bold mb-4 text-primary">
+                            <i class="fas fa-chart-bar mr-2"></i>Top 5 Giảng viên có lượt tư vấn nhiều nhất
+                        </h5>
+                        <div style="height: 350px; position: relative;">
+                            <canvas id="topLecturerChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-lg-8">
+                <div class="app-card shadow-sm border-0">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <h5 class="font-weight-bold mb-0 text-dark">
+                                <i class="fas fa-list-ul mr-2 text-info"></i>Phiếu mượn gần đây
+                            </h5>
+                            <a th:href="@{/admin/borrowings}" class="btn btn-sm btn-link text-decoration-none">Xem tất cả</a>
+                        </div>
+                        <div class="table-responsive">
+                            <table class="table table-hover align-middle">
+                                <thead class="bg-light">
+                                <tr>
+                                    <th>Sinh viên</th>
+                                    <th>Chủ đề</th>
+                                    <th>Trạng thái</th>
+                                    <th class="text-center">Thao tác</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                <tr th:each="br : ${recentBorrowings}">
+                                    <td>
+                                        <div class="font-weight-bold" th:text="${br.session.student.profile.fullName}"></div>
+                                        <small class="text-muted" th:text="${br.session.student.username}"></small>
+                                    </td>
+                                    <td th:text="${br.session.topic}"></td>
+                                    <td>
+                                            <span class="badge px-3 py-1"
+                                                  th:classappend="${br.status.name() == 'PENDING_ALLOCATION'} ? 'badge-warning' : 'badge-success'"
+                                                  th:text="${br.status.name() == 'PENDING_ALLOCATION'} ? 'Chờ cấp phát' : 'Đã xuất kho'">
+                                            </span>
+                                    </td>
+                                    <td class="text-center">
+                                        <a th:href="@{/admin/borrowings/{id}(id=${br.id})}" class="btn btn-sm btn-outline-info">
+                                            Chi tiết
+                                        </a>
+                                    </td>
+                                </tr>
+                                <tr th:if="${#lists.isEmpty(recentBorrowings)}">
+                                    <td colspan="4" class="text-center text-muted py-4">Chưa có dữ liệu phiếu mượn</td>
+                                </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-4">
+                <div class="app-card shadow-sm border-0">
+                    <div class="card-body">
+                        <h5 class="font-weight-bold mb-3 text-danger">
+                            <i class="fas fa-warehouse mr-2"></i>Thiết bị sắp hết
+                        </h5>
+                        <div class="list-group list-group-flush">
+                            <div th:each="e : ${lowStockEquipments}" class="list-group-item px-0 d-flex justify-content-between align-items-center">
+                                <div>
+                                    <span class="font-weight-bold" th:text="${e.name}"></span>
+                                    <div class="small text-muted" th:text="${e.description}"></div>
+                                </div>
+                                <span class="badge badge-pill badge-danger py-2 px-3" th:text="${'Còn ' + e.quantity}"></span>
+                            </div>
+                            <div th:if="${#lists.isEmpty(lowStockEquipments)}" class="text-center py-4 text-success">
+                                <i class="fas fa-check-circle fa-2x mb-2 d-block"></i>
+                                Tồn kho ổn định.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
 
     </div>
-
 </div>
 
 <div th:replace="~{layout/main-layout :: scripts}"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script th:inline="javascript">
+    document.addEventListener("DOMContentLoaded", function() {
+        const ctx = document.getElementById('topLecturerChart').getContext('2d');
+
+        // Nhận dữ liệu từ Controller
+        const lecturerLabels = [[${lecturerNames}]];
+        const sessionData = [[${sessionCounts}]];
+
+        new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: lecturerLabels,
+                datasets: [{
+                    label: 'Số ca tư vấn đã hoàn thành',
+                    data: sessionData,
+                    backgroundColor: 'rgba(78, 115, 223, 0.8)',
+                    borderColor: '#4e73df',
+                    borderWidth: 1,
+                    borderRadius: 10,
+                    barThickness: 60
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: { stepSize: 1 }
+                    }
+                },
+                plugins: {
+                    legend: { display: false }
+                }
+            }
+        });
+    });
+</script>
 
 </body>
 </html>

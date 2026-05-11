@@ -21,4 +21,6 @@ public interface LecturerRepository extends JpaRepository<Lecturer, Long> {
 
     @Query("SELECT l FROM Lecturer l JOIN FETCH l.user u LEFT JOIN FETCH u.profile JOIN FETCH l.department")
     List<Lecturer> findAllWithProfile();
+
+    
 }

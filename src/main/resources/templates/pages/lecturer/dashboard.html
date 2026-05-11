@@ -1,10 +1,93 @@
 <!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Title</title>
-</head>
-<body>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+
+<head th:replace="~{layout/main-layout :: head('Dashboard Giảng viên')}"></head>
+
+<body class="app-page">
+
+<div th:replace="~{layout/main-layout :: sidebar(${sessionUser.role.name()}, 'dashboard')}"></div>
+
+<div class="main-content">
+
+    <div th:replace="~{layout/main-layout :: topbar(
+        'Dashboard Giảng viên',
+        'Quản lý các ca tư vấn và đánh giá học thuật')}">
+    </div>
+
+    <div class="container-fluid mt-4">
+
+        <div class="row">
+
+            <div class="col-md-4 mb-4">
+
+                <div class="app-card shadow-sm border-0">
+
+                    <div class="card-body text-center p-4">
+
+                        <h5 class="text-muted">
+                            Ca chờ xác nhận
+                        </h5>
+
+                        <h1 class="mt-3 text-warning"
+                            th:text="${pendingCount}">
+                            0
+                        </h1>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+            <div class="col-md-4 mb-4">
+
+                <div class="app-card shadow-sm border-0">
+
+                    <div class="card-body text-center p-4">
+
+                        <h5 class="text-muted">
+                            Ca đã tiếp nhận
+                        </h5>
+
+                        <h1 class="mt-3 text-primary"
+                            th:text="${confirmedCount}">
+                            0
+                        </h1>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+            <div class="col-md-4 mb-4">
+
+                <div class="app-card shadow-sm border-0">
+
+                    <div class="card-body text-center p-4">
+
+                        <h5 class="text-muted">
+                            Ca hoàn thành
+                        </h5>
+
+                        <h1 class="mt-3 text-success"
+                            th:text="${completedCount}">
+                            0
+                        </h1>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+<div th:replace="~{layout/main-layout :: scripts}"></div>
 
 </body>
 </html>

@@ -639,14 +639,6 @@
                 Hồ sơ học tập
             </a>
 
-            <!-- CORE-06 / CORE-08 -->
-            <a th:href="@{/student/borrowings}"
-               class="sidebar-link"
-               th:classappend="${active == 'borrowings'} ? 'active'">
-                <i class="fas fa-box-open"></i>
-                Thiết bị mượn
-            </a>
-
         </div>
 
         <!-- LECTURER -->
@@ -666,7 +658,7 @@
                class="sidebar-link"
                th:classappend="${active == 'sessions'} ? 'active'">
                 <i class="fas fa-users"></i>
-                Buổi tư vấn
+                Danh sách ca tư vấn
             </a>
 
             <!-- ✔ BỔ SUNG (CORE-06 DETAIL) -->
@@ -674,7 +666,7 @@
                class="sidebar-link"
                th:classappend="${active == 'evaluations'} ? 'active'">
                 <i class="fas fa-clipboard-check"></i>
-                Đánh giá sinh viên
+                Danh sách đánh giá
             </a>
 
         </div>
@@ -696,7 +688,7 @@
                class="sidebar-link"
                th:classappend="${active == 'equipments'} ? 'active'">
                 <i class="fas fa-tools"></i>
-                Thiết bị
+                Danh sách thiết bị
             </a>
 
             <!-- CORE-08 -->
@@ -704,30 +696,7 @@
                class="sidebar-link"
                th:classappend="${active == 'borrowings'} ? 'active'">
                 <i class="fas fa-boxes"></i>
-                Cấp phát
-            </a>
-
-            <!-- CORE-05 monitoring -->
-            <a th:href="@{/admin/sessions}"
-               class="sidebar-link"
-               th:classappend="${active == 'sessions'} ? 'active'">
-                <i class="fas fa-calendar"></i>
-                Lịch tư vấn
-            </a>
-
-            <!-- ✔ BỔ SUNG THEO SRS (seed data) -->
-            <a th:href="@{/admin/departments}"
-               class="sidebar-link"
-               th:classappend="${active == 'departments'} ? 'active'">
-                <i class="fas fa-sitemap"></i>
-                Khoa / Ngành
-            </a>
-
-            <a th:href="@{/admin/lab-types}"
-               class="sidebar-link"
-               th:classappend="${active == 'lab-types'} ? 'active'">
-                <i class="fas fa-vials"></i>
-                Loại phòng Lab
+                Cấp phát thiết bị
             </a>
 
         </div>
@@ -738,21 +707,15 @@
 
         <div class="dropdown">
 
-            <div class="sidebar-user-card dropdown-toggle"
-                 data-toggle="dropdown">
+            <div class="sidebar-user-card dropdown-toggle d-flex align-items-center" data-toggle="dropdown">
 
                 <div class="user-avatar"
                      th:text="${#strings.substring(sessionUser.fullName,0,1)}">
                 </div>
 
-                <div>
-                    <div class="user-name"
-                         th:text="${sessionUser.fullName}">
-                    </div>
-
-                    <div class="user-role"
-                         th:text="${role}">
-                    </div>
+                <div class="flex-grow-1 ml-2">
+                    <div class="user-name" th:text="${sessionUser.fullName}"></div>
+                    <div class="user-role" th:text="${role}"></div>
                 </div>
             </div>
 

@@ -98,6 +98,6 @@ public class AuthController {
 
         session.invalidate();
 
-        return "redirect:/auth/login?logout";
+        return "redirect:/auth/login";
     }
 }

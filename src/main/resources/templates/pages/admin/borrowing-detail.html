@@ -1,10 +1,95 @@
 <!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Title</title>
-</head>
-<body>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+
+<head th:replace="~{layout/main-layout :: head('Chi tiết phiếu mượn')}"></head>
+
+<body class="app-page">
+
+<div th:replace="~{layout/main-layout :: sidebar(${sessionUser.role.name()}, 'borrowings')}"></div>
+
+<div class="main-content">
+    <div th:replace="~{layout/main-layout :: topbar('Chi tiết cấp phát','Thông tin chi tiết phiếu mượn thiết bị')}"></div>
+
+    <div class="container-fluid mt-4">
+        <div class="row justify-content-center">
+            <div class="col-lg-10">
+
+                <div class="app-card shadow-sm border-0">
+                    <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0 text-primary font-weight-bold">
+                            <i class="fas fa-file-invoice mr-2"></i>Thông tin phiếu mượn
+                        </h5>
+                        <a th:href="@{/admin/borrowings}" class="btn btn-sm btn-outline-secondary">
+                            <i class="fas fa-arrow-left mr-1"></i> Quay lại
+                        </a>
+                    </div>
+
+                    <div class="card-body p-4">
+                        <div class="row mb-4 align-items-center"> <div class="col-md-4">
+                            <label class="text-muted small d-block mb-1">Sinh viên</label>
+                            <p class="font-weight-bold text-dark mb-0" th:text="${record.session.student.profile.fullName}"></p>
+                            <small class="text-muted" th:text="${record.session.student.username}"></small>
+                        </div>
+                            <div class="col-md-5 border-left"> <label class="text-muted small d-block mb-1">Chủ đề tư vấn</label>
+                                <p class="font-weight-bold text-dark mb-0" th:text="${record.session.topic}"></p>
+                            </div>
+                            <div class="col-md-3 text-md-right"> <label class="text-muted small d-block mb-1">Trạng thái phiếu</label>
+                                <span class="badge px-3 py-2"
+                                      th:classappend="${record.status.name() == 'PENDING_ALLOCATION' ? 'badge-warning' :
+                               (record.status.name() == 'EXPORTED' ? 'badge-success' :
+                               (record.status.name() == 'REJECTED' ? 'badge-danger' : 'badge-primary'))}"
+                                      th:text="${record.status.name() == 'PENDING_ALLOCATION' ? 'Chờ cấp phát' :
+                        (record.status.name() == 'EXPORTED' ? 'Đã xuất kho' :
+                        (record.status.name() == 'REJECTED' ? 'Đã từ chối' : 'Đã trả'))}">
+        </span>
+                            </div>
+                        </div>
+
+                        <hr>
+
+                        <h6 class="font-weight-bold mb-3"><i class="fas fa-list mr-2"></i>Danh sách thiết bị yêu cầu</h6>
+                        <div class="table-responsive">
+                            <table class="table table-hover table-custom border">
+                                <thead class="bg-light">
+                                <tr>
+                                    <th>Tên thiết bị</th>
+                                    <th class="text-right">Đơn giá cọc</th> <th class="text-center">Số lượng</th>
+                                    <th class="text-center">Tồn kho</th>
+                                    <th class="text-center">Kiểm tra</th>
+                                </tr>
+                                </thead>
+
+                                <tbody>
+                                <tr th:each="detail : ${record.details}">
+                                    <td class="font-weight-bold" th:text="${detail.equipment.name}"></td>
+
+                                    <td class="text-right">
+        <span th:if="${detail.equipment.depositAmount != null and detail.equipment.depositAmount > 0}"
+              th:text="${#numbers.formatDecimal(detail.equipment.depositAmount, 0, 'COMMA', 0, 'POINT')} + ' VNĐ'"
+              class="text-danger">
+        </span>
+                                        <span th:unless="${detail.equipment.depositAmount != null and detail.equipment.depositAmount > 0}"
+                                              class="text-success small">Miễn phí</span>
+                                    </td>
+
+                                    <td class="text-center" th:text="${detail.quantity}"></td>
+                                    <td class="text-center" th:text="${detail.equipment.quantity}"></td>
+                                    <td class="text-center">
+                                    </td>
+                                </tr>
+                                </tbody>
+                            </table>
+                        </div>
+
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+<div th:replace="~{layout/main-layout :: scripts}"></div>
 
 </body>
 </html>

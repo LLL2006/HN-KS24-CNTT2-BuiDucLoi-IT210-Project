@@ -16,6 +16,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 
 @Service
 @RequiredArgsConstructor
@@ -36,8 +37,8 @@ public class EvaluationServiceImpl implements EvaluationService {
             throw new BadRequestException("Bạn không có quyền đánh giá lịch này");
         }
 
-        if (session.getStatus() != SessionStatus.PENDING) {
-            throw new BadRequestException("Chỉ có thể đánh giá lịch đang chờ xác nhận");
+        if (session.getStatus() != SessionStatus.CONFIRMED) {
+            throw new BadRequestException("Chỉ có thể đánh giá lịch đã được tiếp nhận");
         }
 
         session.setStatus(SessionStatus.COMPLETED);
@@ -52,27 +53,43 @@ public class EvaluationServiceImpl implements EvaluationService {
 
         academicEvaluationRepository.save(evaluation);
 
-        BorrowingRecord borrowingRecord = BorrowingRecord.builder()
-                .session(session)
-                .status(BorrowingStatus.PENDING_ALLOCATION)
-                .createdAt(LocalDateTime.now())
-                .build();
+        if (request.getEquipments() != null && !request.getEquipments().isEmpty()) {
+            double totalDeposit = 0; // Khởi tạo tổng tiền cọc
 
-        if (request.getEquipments() != null) {
+            BorrowingRecord borrowingRecord = BorrowingRecord.builder()
+                    .session(session)
+                    .status(BorrowingStatus.PENDING_ALLOCATION)
+                    .createdAt(LocalDateTime.now())
+                    .details(new ArrayList<>()) // Đảm bảo list không null
+                    .build();
+
             for (EvaluationRequest.EquipmentItem item : request.getEquipments()) {
+                if (item.getQuantity() == null || item.getQuantity() <= 0) continue;
+
                 Equipment equipment = equipmentRepository.findById(item.getEquipmentId())
                         .orElseThrow(() -> new NotFoundException("Không tìm thấy thiết bị"));
 
+                // VALIDATE TỒN KHO: Nếu thiếu sẽ ném lỗi ngay
+                if (equipment.getQuantity() < item.getQuantity()) {
+                    throw new BadRequestException("Thiết bị [" + equipment.getName() + "] không đủ tồn kho (Hiện có: " + equipment.getQuantity() + ")");
+                }
+
+                // TÍNH TOÁN: Tổng tiền = Đơn giá cọc * Số lượng
+                if (equipment.getDepositAmount() != null) {
+                    totalDeposit += (equipment.getDepositAmount() * item.getQuantity());
+                }
+
                 BorrowingDetail detail = BorrowingDetail.builder()
-                        .borrowingRecord(borrowingRecord)
                         .equipment(equipment)
                         .quantity(item.getQuantity())
+                        .borrowingRecord(borrowingRecord)
                         .build();
 
                 borrowingRecord.getDetails().add(detail);
             }
-        }
 
-        borrowingRecordRepository.save(borrowingRecord);
+            borrowingRecord.setDepositAmount(totalDeposit); // Gán tổng tiền vào record
+            borrowingRecordRepository.save(borrowingRecord);
+        }
     }
 }

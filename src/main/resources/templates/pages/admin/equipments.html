@@ -25,6 +25,8 @@
                         <th>Tên</th>
                         <th>Mô tả</th>
                         <th>Số lượng</th>
+                        <th>Yêu cầu cọc</th>
+                        <th>Tiền cọc</th>
                         <th>Trạng thái</th>
                         <th width="220">Hành động</th>
                     </tr>
@@ -41,6 +43,28 @@
                         <td th:text="${e.description}"></td>
 
                         <td th:text="${e.quantity}"></td>
+
+                        <td>
+    <span th:if="${e.requiresDeposit}"
+          class="badge badge-warning px-3 py-2">
+        Có
+    </span>
+
+                            <span th:unless="${e.requiresDeposit}"
+                                  class="badge badge-secondary px-3 py-2">
+        Không
+    </span>
+                        </td>
+
+                        <td>
+    <span th:if="${e.requiresDeposit}"
+          th:text="${#numbers.formatDecimal(e.depositAmount,0,'COMMA',0,'POINT')} + ' VNĐ'">
+    </span>
+
+                            <span th:unless="${e.requiresDeposit}">
+        -
+    </span>
+                        </td>
 
                         <td>
         <span th:if="${e.active}"

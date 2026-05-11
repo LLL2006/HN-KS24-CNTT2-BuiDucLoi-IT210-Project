@@ -45,6 +45,27 @@
                                 <small class="text-danger" th:if="${#fields.hasErrors('quantity')}" th:errors="*{quantity}"></small>
                             </div>
 
+                            <div class="form-group custom-input">
+                                <label>Thiết bị cần đặt cọc?</label>
+                                <select class="form-control custom-input"
+                                        th:field="*{requiresDeposit}"
+                                        style="height: 45px !important; line-height: 1.5 !important; padding-top: 5px !important;">
+                                    <option th:value="false">Không</option>
+                                    <option th:value="true">Có</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+
+                                <label>Số tiền cọc (VNĐ)</label>
+
+                                <input type="number"
+                                       class="form-control"
+                                       th:field="*{depositAmount}"
+                                       min="0">
+
+                            </div>
+
                             <div class="d-flex justify-content-end mt-4">
                                 <a th:href="@{/admin/equipments}" class="btn btn-outline-custom mr-2">Hủy</a>
                                 <button type="submit" class="btn btn-primary-custom">

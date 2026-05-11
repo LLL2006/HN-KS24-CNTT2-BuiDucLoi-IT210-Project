@@ -16,4 +16,5 @@ public interface EquipmentService {
     Equipment update(Long id, EquipmentRequest request);
 
     void delete(Long id);
+
 }

@@ -33,7 +33,21 @@ public class BorrowingRecord {
 
     private LocalDateTime exportedAt;
 
-    @OneToMany(mappedBy = "borrowingRecord", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "borrowingRecord",
+            cascade = CascadeType.ALL,
+            orphanRemoval = true)
     @Builder.Default
     private List<BorrowingDetail> details = new ArrayList<>();
+
+    // tiền cọc
+    private Double depositAmount;
+
+    // tiền bị phạt
+    private Double penaltyAmount;
+
+    // hạn phải trả
+    private LocalDateTime dueReturnTime;
+
+    // thời gian trả thực tế
+    private LocalDateTime actualReturnTime;
 }

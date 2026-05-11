@@ -16,11 +16,11 @@ public class BorrowingDetail {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne(optional = false)
+    @ManyToOne
     @JoinColumn(name = "borrowing_record_id")
     private BorrowingRecord borrowingRecord;
 
-    @ManyToOne(optional = false)
+    @ManyToOne
     @JoinColumn(name = "equipment_id")
     private Equipment equipment;
 

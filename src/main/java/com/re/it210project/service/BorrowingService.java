@@ -8,4 +8,8 @@ public interface BorrowingService {
     List<BorrowingRecord> findAllPending();
     void approveExport(Long borrowingRecordId);
     BorrowingRecord findById(Long id);
+    void rejectExport(Long borrowingRecordId);
+    List<BorrowingRecord> findAll();
+    void returnEquipment(Long recordId);
+    
 }

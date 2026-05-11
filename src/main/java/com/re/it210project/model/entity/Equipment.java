@@ -27,4 +27,8 @@ public class Equipment {
 
     @Column(nullable = false)
     private Boolean active;
+
+    private Boolean requiresDeposit;
+
+    private Double depositAmount;
 }

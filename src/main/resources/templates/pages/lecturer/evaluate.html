@@ -1,222 +1,213 @@
 <!DOCTYPE html>
 <html lang="vi" xmlns:th="http://www.thymeleaf.org">
-<head th:replace="fragments/layout :: head('Đánh giá tư vấn')"></head>
+
+<head th:replace="~{layout/main-layout :: head('Đánh giá sinh viên')}"></head>
+
 <body class="app-page">
 
-<nav th:replace="fragments/layout :: sidebar('LECTURER', 'sessions')"></nav>
-<header th:replace="fragments/layout :: topbar('Nhập đánh giá',
-    '<a href=\'/lecturer/sessions\'>Danh sách tư vấn</a> <span class=\'sep\'>/</span> Đánh giá')"></header>
+<div th:replace="~{layout/main-layout :: sidebar(${sessionUser.role.name()}, 'sessions')}"></div>
 
-<main class="main-content">
-    <div th:replace="fragments/layout :: alerts"></div>
+<div class="main-content">
 
-    <!-- Session info banner -->
-    <div class="app-card mb-4" style="border-left:4px solid var(--purple-main)">
-        <div class="card-body py-3">
-            <div class="row align-items-center">
-                <div class="col-md-3">
-                    <div style="font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--text-muted)">Sinh viên</div>
-                    <div style="font-weight:700;font-size:1rem" th:text="${session.studentName}">Nguyễn Văn B</div>
-                    <div class="text-muted" style="font-size:.8rem" th:text="${session.studentCode}">SV001</div>
-                </div>
-                <div class="col-md-3">
-                    <div style="font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--text-muted)">Thời gian</div>
-                    <div style="font-weight:600" th:text="${#temporals.format(session.sessionDatetime,'dd/MM/yyyy HH:mm')}">20/06/2025 09:00</div>
-                    <div class="text-muted" style="font-size:.8rem" th:text="${session.durationMinutes + ' phút'}">60 phút</div>
-                </div>
-                <div class="col-md-6">
-                    <div style="font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--text-muted)">Chủ đề</div>
-                    <div style="font-size:.9rem" th:text="${session.topic}">Ôn tập Cấu trúc dữ liệu</div>
-                </div>
-            </div>
-        </div>
+    <div th:replace="~{layout/main-layout :: topbar(
+        'Đánh giá sinh viên',
+        'Nhập đánh giá năng lực và đề xuất thiết bị')}">
     </div>
 
-    <!-- CORE-06: Transaction form — đánh giá + chỉ định thiết bị -->
-    <form th:action="@{/lecturer/sessions/{id}/evaluate(id=${session.id})}"
-          th:object="${evaluationRequest}" method="post" id="evalForm">
-        <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
-        <input type="hidden" th:field="*{sessionId}"/>
+    <div class="container-fluid mt-4">
+
+        <div th:replace="~{layout/main-layout :: alerts}"></div>
 
         <div class="row">
+            <div class="col-12">
 
-            <!-- LEFT: Đánh giá năng lực -->
-            <div class="col-lg-7 mb-4">
-                <div class="app-card">
-                    <div class="card-header">
-                        <i class="fas fa-star mr-2" style="color:var(--warning)"></i>Đánh giá năng lực
-                    </div>
-                    <div class="card-body">
+                <div class="app-card shadow-sm border-0">
+                    <div class="card-body p-4">
 
-                        <!-- Điểm số -->
-                        <div class="form-group">
-                            <label>Điểm năng lực (1–10) <span style="color:var(--danger)">*</span></label>
-                            <div class="d-flex align-items-center" style="gap:14px">
-                                <input type="range" th:field="*{competencyScore}" min="1" max="10" step="1"
-                                       class="custom-range flex-1" id="scoreSlider" style="flex:1"
-                                       oninput="document.getElementById('scoreDisplay').textContent=this.value"/>
-                                <div id="scoreDisplay"
-                                     style="width:50px;height:50px;border-radius:50%;background:linear-gradient(135deg,var(--blue-grad),var(--purple-main));
-                                            display:flex;align-items:center;justify-content:center;color:#fff;font-weight:800;font-size:1.1rem;flex-shrink:0"
-                                     th:text="${evaluationRequest?.competencyScore ?: 5}">5</div>
+                        <h4 class="mb-4 text-dark font-weight-bold">Phiếu đánh giá học thuật</h4>
+
+                        <div th:if="${error}" class="alert alert-danger alert-dismissible fade show" role="alert">
+                            <i class="fas fa-exclamation-circle mr-2"></i>
+                            <span th:text="${error}"></span>
+                            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
+                        </div>
+                        <form th:action="@{/lecturer/evaluations}"
+                              th:object="${evaluationRequest}"
+                              method="post">
+
+                            <input type="hidden" th:field="*{sessionId}">
+
+                            <div class="form-group mb-4">
+                                <label class="font-weight-bold text-dark">Nội dung đánh giá</label>
+
+                                <textarea class="form-control custom-textarea"
+                                          rows="4"
+                                          th:field="*{content}"
+                                          placeholder="Nhập nhận xét chi tiết về năng lực học thuật của sinh viên..."></textarea>
+
+                                <div class="text-danger small mt-1"
+                                     th:if="${#fields.hasErrors('content')}"
+                                     th:errors="*{content}"></div>
                             </div>
-                            <small class="error-text" th:if="${#fields.hasErrors('competencyScore')}" th:errors="*{competencyScore}"></small>
-                        </div>
 
-                        <!-- Điểm mạnh -->
-                        <div class="form-group">
-                            <label><i class="fas fa-plus-circle mr-1" style="color:var(--success)"></i>Điểm mạnh <span style="color:var(--danger)">*</span></label>
-                            <textarea th:field="*{strengths}" class="form-control" rows="3"
-                                      th:classappend="${#fields.hasErrors('strengths')} ? ' is-invalid'"
-                                      placeholder="Sinh viên nắm vững..."></textarea>
-                            <small class="error-text" th:if="${#fields.hasErrors('strengths')}" th:errors="*{strengths}"></small>
-                        </div>
+                            <div class="form-group mb-4">
+                                <label class="font-weight-bold text-dark">Mức năng lực</label>
 
-                        <!-- Điểm yếu -->
-                        <div class="form-group">
-                            <label><i class="fas fa-minus-circle mr-1" style="color:var(--danger)"></i>Điểm cần cải thiện</label>
-                            <textarea th:field="*{weaknesses}" class="form-control" rows="2"
-                                      placeholder="Cần cải thiện..."></textarea>
-                        </div>
+                                <select class="form-control custom-select-control"
+                                        th:field="*{abilityLevel}">
 
-                        <!-- Khuyến nghị -->
-                        <div class="form-group">
-                            <label><i class="fas fa-lightbulb mr-1" style="color:var(--warning)"></i>Khuyến nghị</label>
-                            <textarea th:field="*{recommendations}" class="form-control" rows="2"
-                                      placeholder="Nên học thêm..."></textarea>
-                        </div>
+                                    <option value="">-- Chọn mức năng lực --</option>
+                                    <option value="Yêu">Yếu</option>
+                                    <option value="Trung bình">Trung bình</option>
+                                    <option value="Khá">Khá</option>
+                                    <option value="Giỏi">Giỏi</option>
+                                    <option value="Xuất sắc">Xuất sắc</option>
 
-                        <!-- Bước tiếp theo -->
-                        <div class="form-group mb-0">
-                            <label><i class="fas fa-arrow-right mr-1" style="color:var(--info)"></i>Bước tiếp theo</label>
-                            <textarea th:field="*{nextSteps}" class="form-control" rows="2"
-                                      placeholder="Thực hành bài..."></textarea>
-                        </div>
-                    </div>
-                </div>
-            </div>
+                                </select>
 
-            <!-- RIGHT: Chỉ định thiết bị -->
-            <div class="col-lg-5 mb-4">
-                <div class="app-card">
-                    <div class="card-header d-flex align-items-center justify-content-between">
-                        <span><i class="fas fa-tools mr-2" style="color:var(--blue-grad)"></i>Chỉ định thiết bị</span>
-                        <button type="button" class="btn btn-sm btn-outline-purple" onclick="addEquipmentRow()">
-                            <i class="fas fa-plus mr-1"></i>Thêm
-                        </button>
-                    </div>
-                    <div class="card-body">
-                        <div id="equipmentRows">
-                            <!-- Row template (JS will clone) -->
-                            <div class="equipment-row mb-2 p-2"
-                                 style="background:#f8f9fa;border-radius:10px;border:1px dashed var(--border)"
-                                 th:each="eq, eqStat : ${evaluationRequest?.equipments}"
-                                 th:if="${evaluationRequest?.equipments != null}">
-                                <div class="d-flex align-items-center" style="gap:8px">
-                                    <select th:name="'equipments[' + ${eqStat.index} + '].equipmentId'"
-                                            class="form-control" style="font-size:.83rem">
-                                        <option value="">-- Chọn thiết bị --</option>
-                                        <option th:each="e : ${equipments}"
-                                                th:value="${e.id}"
-                                                th:text="${e.name + ' (tồn: ' + e.quantityInStock + ' ' + e.unit + ')'}"
-                                                th:selected="${e.id == eq.equipmentId}"></option>
-                                    </select>
-                                    <input type="number" th:name="'equipments[' + ${eqStat.index} + '].quantity'"
-                                           th:value="${eq.quantity}" min="1" placeholder="SL"
-                                           class="form-control" style="width:70px;font-size:.83rem"/>
-                                    <button type="button" onclick="this.closest('.equipment-row').remove()"
-                                            class="btn btn-sm" style="color:var(--danger);padding:4px 8px;border:none;background:none">
-                                        <i class="fas fa-trash"></i>
-                                    </button>
-                                </div>
+                                <div class="text-danger small mt-1"
+                                     th:if="${#fields.hasErrors('abilityLevel')}"
+                                     th:errors="*{abilityLevel}"></div>
                             </div>
-                        </div>
 
-                        <!-- Empty hint -->
-                        <div id="emptyEquipmentHint" class="text-center py-3 text-muted"
-                             style="font-size:.83rem;display:none">
-                            <i class="fas fa-box-open fa-2x mb-2 d-block" style="opacity:.3"></i>
-                            Chưa có thiết bị nào được chỉ định
-                        </div>
+                            <div class="mb-3 d-flex justify-content-between align-items-center">
+                                <label class="font-weight-bold text-dark mb-0">Thiết bị đề xuất</label>
+                                <button type="button"
+                                        class="btn btn-sm btn-outline-primary"
+                                        style="border-radius: 8px;"
+                                        onclick="addEquipment()">
+                                    <i class="fas fa-plus mr-1"></i> Thêm thiết bị
+                                </button>
+                            </div>
 
-                        <!-- Hạn trả -->
-                        <div class="form-group mt-3 mb-0">
-                            <label style="font-size:.8rem"><i class="fas fa-calendar-day mr-1" style="color:var(--purple-main)"></i>
-                                Ngày hạn trả <span style="color:var(--danger)">*</span></label>
-                            <input type="date" th:field="*{dueDate}" class="form-control"
-                                   th:classappend="${#fields.hasErrors('dueDate')} ? ' is-invalid'"
-                                   th:min="${#temporals.format(#temporals.createNow(),'yyyy-MM-dd')}"/>
-                            <small class="error-text" th:if="${#fields.hasErrors('dueDate')}" th:errors="*{dueDate}"></small>
-                        </div>
+                            <div id="equipmentContainer" class="mb-4"></div>
+
+                            <hr class="my-4">
+
+                            <div class="text-left">
+                                <button type="submit" class="btn btn-success px-5 py-2 font-weight-bold shadow-sm"
+                                        style="border-radius: 10px;">
+                                    <i class="fas fa-save mr-2"></i> Lưu đánh giá & Cấp thiết bị
+                                </button>
+                            </div>
+
+                        </form>
+
                     </div>
                 </div>
 
-                <!-- Warning: Transaction note -->
-                <div class="smart-alert warning mt-3">
-                    <i class="fas fa-exclamation-triangle"></i>
-                    <div style="font-size:.83rem">
-                        <strong>Lưu ý:</strong> Khi bấm lưu, hệ thống sẽ đồng thời cập nhật trạng thái lịch,
-                        lưu đánh giá và tạo phiếu mượn thiết bị trong một giao dịch. Nếu có lỗi, toàn bộ sẽ được rollback.
-                    </div>
-                </div>
-
-                <!-- Submit -->
-                <div class="d-flex" style="gap:10px;margin-top:16px">
-                    <a th:href="@{/lecturer/sessions}" class="btn btn-outline-purple flex-fill text-center">Hủy</a>
-                    <button type="submit" class="btn btn-purple flex-fill">
-                        <i class="fas fa-save mr-2"></i>Lưu đánh giá
-                    </button>
-                </div>
             </div>
         </div>
-    </form>
-</main>
 
-<div th:replace="fragments/layout :: scripts"></div>
-<script>
-    let rowIndex = /*[[${evaluationRequest?.equipments?.size() ?: 0}]]*/ 0;
-    const equipments = /*[[${equipments}]]*/ [];
+    </div>
+</div>
 
-    function addEquipmentRow() {
-        const container = document.getElementById('equipmentRows');
-        const hint = document.getElementById('emptyEquipmentHint');
-        hint.style.display = 'none';
+<div th:replace="~{layout/main-layout :: scripts}"></div>
 
-        let options = '<option value="">-- Chọn thiết bị --</option>';
-        equipments.forEach(e => {
-            options += `<option value="${e.id}">${e.name} (tồn: ${e.quantityInStock} ${e.unit})</option>`;
-        });
-
-        const row = document.createElement('div');
-        row.className = 'equipment-row mb-2 p-2';
-        row.style.cssText = 'background:#f8f9fa;border-radius:10px;border:1px dashed var(--border)';
-        row.innerHTML = `
-            <div class="d-flex align-items-center" style="gap:8px">
-                <select name="equipments[${rowIndex}].equipmentId" class="form-control" style="font-size:.83rem">${options}</select>
-                <input type="number" name="equipments[${rowIndex}].quantity" min="1" value="1" placeholder="SL"
-                       class="form-control" style="width:70px;font-size:.83rem"/>
-                <button type="button" onclick="this.closest('.equipment-row').remove()"
-                        class="btn btn-sm" style="color:var(--danger);padding:4px 8px;border:none;background:none">
-                    <i class="fas fa-trash"></i>
-                </button>
-            </div>`;
-        container.appendChild(row);
-        rowIndex++;
+<style>
+    /* Fix lỗi nuốt chữ: Dùng padding thay vì line-height cứng */
+    .custom-select-control {
+        height: 48px !important;
+        padding: 8px 15px !important;
+        border-radius: 10px;
+        border: 1px solid #ced4da;
+        appearance: auto !important; /* Hiện mũi tên dropdown chuẩn của trình duyệt */
     }
 
-    // Init slider display
-    const slider = document.getElementById('scoreSlider');
-    if (slider) {
-        slider.addEventListener('input', () => {
-            const disp = document.getElementById('scoreDisplay');
-            disp.textContent = slider.value;
-            const pct = (slider.value - 1) / 9;
-            const r = Math.round(102 + (232 - 102) * pct);
-            const g = Math.round(126 + (82  - 126) * pct);
-            const b = Math.round(234 + (58  - 234) * pct);
-            disp.style.background = `rgb(${r},${g},${b})`;
-        });
+    .custom-textarea {
+        border-radius: 10px;
+        padding: 15px !important;
+        border: 1px solid #ced4da;
     }
+
+    .equipment-row {
+        background: #fdfdfd;
+        border: 1px solid #eee;
+        border-radius: 12px;
+        padding: 15px;
+        margin-bottom: 12px;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.02);
+    }
+
+    .btn-circle-delete {
+        width: 48px;
+        height: 48px;
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+</style>
+
+// Tìm đoạn script ở cuối file và thay bằng đoạn này
+<script th:inline="javascript">
+    const availableEquipments = /*[[${equipments}]]*/ [];
+    // Lấy dữ liệu cũ từ server nếu có lỗi xảy ra
+    const oldEquipments = /*[[${evaluationRequest.equipments}]]*/ [];
+
+    function addEquipment(oldData = null) {
+        const container = document.getElementById("equipmentContainer");
+        const index = container.children.length;
+
+        let optionsHtml = '<option value="">-- Chọn thiết bị --</option>';
+        availableEquipments.forEach(e => {
+            // Kiểm tra xem có phải là thiết bị đã chọn trước đó không
+            const selected = (oldData && e.id == oldData.equipmentId) ? 'selected' : '';
+            optionsHtml += `<option value="${e.id}" ${selected}>${e.name}</option>`;
+        });
+
+        const initialQty = oldData ? oldData.quantity : 1;
+
+        const html = `
+<div class="equipment-row d-flex justify-content-between align-items-center animate__animated animate__fadeIn">
+    <div class="flex-grow-1 mr-3">
+        <select name="equipments[${index}].equipmentId" id="select-${index}"
+                class="form-control custom-select-control" onchange="updateDeposit(${index})">
+            ${optionsHtml}
+        </select>
+    </div>
+    <div class="d-flex align-items-center">
+        <div class="input-group mr-2" style="width: 230px;">
+            <div class="input-group-prepend"><span class="input-group-text bg-light text-muted small font-weight-bold">Tổng cọc</span></div>
+            <input type="text" id="deposit-${index}" class="form-control bg-white text-danger font-weight-bold" readonly placeholder="0 VNĐ" style="height: 48px;">
+        </div>
+        <div class="input-group" style="width: 100px;">
+            <div class="input-group-prepend"><span class="input-group-text bg-light text-muted font-weight-bold">SL</span></div>
+            <input type="number" id="quantity-${index}" name="equipments[${index}].quantity"
+                   class="form-control" min="1" value="${initialQty}" oninput="updateDeposit(${index})" style="height: 48px;">
+        </div>
+        <button type="button" class="btn btn-danger btn-circle-delete ml-3" onclick="this.parentElement.parentElement.remove()"><i class="fas fa-trash"></i></button>
+    </div>
+</div>`;
+        container.insertAdjacentHTML("beforeend", html);
+        updateDeposit(index); // Tính lại tiền cọc ngay khi vẽ ra
+    }
+
+    function updateDeposit(index) {
+        const select = document.getElementById(`select-${index}`);
+        if(!select) return;
+        const equipmentId = select.value;
+        const quantity = document.getElementById(`quantity-${index}`).value;
+        const depositInput = document.getElementById(`deposit-${index}`);
+        const equipment = availableEquipments.find(e => e.id == equipmentId);
+
+        if (equipment && equipment.depositAmount > 0) {
+            depositInput.value = new Intl.NumberFormat('vi-VN').format(equipment.depositAmount * quantity) + " VNĐ";
+        } else {
+            depositInput.value = "Miễn phí";
+        }
+    }
+
+    window.onload = function() {
+        if (oldEquipments && oldEquipments.length > 0) {
+            // Nếu có lỗi, vẽ lại toàn bộ danh sách thiết bị đã chọn
+            oldEquipments.forEach(item => addEquipment(item));
+        } else {
+            addEquipment();
+        }
+    };
 </script>
 </body>
 </html>

@@ -58,4 +58,5 @@ public class EquipmentServiceImpl implements EquipmentService {
         equipment.setActive(false);
         equipmentRepository.save(equipment);
     }
+
 }

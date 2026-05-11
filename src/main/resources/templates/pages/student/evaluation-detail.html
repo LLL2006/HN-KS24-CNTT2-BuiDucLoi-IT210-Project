@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{layout/main-layout :: head('Chi tiết đánh giá')}"></head>
+<body class="app-page">
+<div th:replace="~{layout/main-layout :: sidebar(${sessionUser.role.name()}, 'history')}"></div>
+<div class="main-content">
+    <div th:replace="~{layout/main-layout :: topbar('Chi tiết đánh giá', 'Nội dung nhận xét năng lực từ giảng viên')}"></div>
+
+    <div class="container-fluid mt-4">
+        <div class="row justify-content-center">
+            <div class="col-lg-9">
+                <div class="app-card shadow-sm border-0">
+                    <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0 text-primary font-weight-bold"><i class="fas fa-file-alt mr-2"></i>Kết quả học thuật</h5>
+                        <a th:href="@{/student/history}" class="btn btn-sm btn-outline-secondary">
+                            <i class="fas fa-arrow-left"></i> Quay lại lịch sử
+                        </a>
+                    </div>
+                    <div class="card-body p-4">
+                        <div class="row mb-4">
+                            <div class="col-md-6 mb-3">
+                                <label class="text-muted small d-block mb-1">Giảng viên</label>
+                                <p class="font-weight-bold text-dark mb-0" th:text="${evaluation.session.lecturer.user.profile.fullName}"></p>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="text-muted small d-block mb-1">Ngày tư vấn</label>
+                                <p class="font-weight-bold text-dark mb-0" th:text="${#temporals.format(evaluation.session.startTime, 'dd/MM/yyyy HH:mm')}"></p>
+                            </div>
+                        </div>
+
+                        <div class="mb-4">
+                            <label class="font-weight-bold text-dark"><i class="fas fa-star text-warning mr-2"></i>Mức năng lực</label>
+                            <div class="mt-2">
+                                <span class="badge badge-primary px-3 py-2" th:text="${evaluation.abilityLevel}"></span>
+                            </div>
+                        </div>
+
+                        <div class="mb-4">
+                            <label class="font-weight-bold text-dark">Nội dung nhận xét</label>
+                            <div class="border rounded p-3 bg-light mt-2" style="min-height: 150px; white-space: pre-line;" th:text="${evaluation.content}"></div>
+                        </div>
+
+                        <div class="text-right mt-4" th:if="${evaluation.session.borrowingRecord != null}">
+                            <a th:href="@{'/student/history/' + ${evaluation.session.id} + '/borrowing'}" class="btn btn-info">
+                                <i class="fas fa-tools mr-1"></i> Xem thiết bị đã mượn buổi này
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div th:replace="~{layout/main-layout :: scripts}"></div>
+</body>
+</html>

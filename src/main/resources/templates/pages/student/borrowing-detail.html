@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{layout/main-layout :: head('Thiết bị hỗ trợ')}"></head>
+<body class="app-page">
+<div th:replace="~{layout/main-layout :: sidebar(${sessionUser.role.name()}, 'history')}"></div>
+<div class="main-content">
+    <div th:replace="~{layout/main-layout :: topbar('Thiết bị mượn', 'Danh sách vật tư đã được cấp cho buổi tư vấn')}"></div>
+
+    <div class="container-fluid mt-4">
+        <div class="row justify-content-center">
+            <div class="col-lg-8">
+                <div class="app-card shadow-sm border-0">
+                    <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0 text-success font-weight-bold"><i class="fas fa-boxes mr-2"></i>Danh mục thiết bị</h5>
+                        <a th:href="@{'/student/history/' + ${evaluation.session.id}}" class="btn btn-sm btn-outline-info">
+                            <i class="fas fa-chevron-left"></i> Quay lại đánh giá
+                        </a>
+                    </div>
+                    <div class="card-body p-4 d-flex flex-column" style="min-height: 400px;">
+
+                        <div class="flex-grow-1">
+                            <div th:if="${evaluation.session.borrowingRecord.status.name() == 'EXPORTED'}">
+                                <div class="table-responsive">
+                                    <table class="table table-bordered table-hover">
+                                        <thead class="bg-light">
+                                        <tr>
+                                            <th class="py-3">Tên thiết bị / Tài liệu</th>
+                                            <th class="text-center py-3" style="width: 150px;">Số lượng</th>
+                                            <th class="text-center py-3" style="width: 220px;">Tiền cọc</th>
+                                        </tr>
+                                        </thead>
+                                        <tbody>
+                                        <tr th:each="detail : ${evaluation.session.borrowingRecord.details}">
+                                            <td class="py-3 font-weight-bold">
+                                                <div th:text="${detail.equipment.name}"></div>
+                                                <small class="text-danger" th:if="${detail.equipment.requiresDeposit}">Thiết bị yêu cầu đặt cọc</small>
+                                            </td>
+                                            <td class="text-center py-3">
+                                                <span class="badge badge-pill badge-secondary px-3" th:text="${detail.quantity}"></span>
+                                            </td>
+                                            <td class="text-center py-3">
+                        <span th:if="${detail.equipment.requiresDeposit}" class="text-danger font-weight-bold"
+                              th:text="${#numbers.formatDecimal(detail.equipment.depositAmount,0,'COMMA',0,'POINT')} + ' VNĐ'">
+                        </span>
+                                                <span th:unless="${detail.equipment.requiresDeposit}">-</span>
+                                            </td>
+                                        </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+
+                            <div th:if="${evaluation.session.borrowingRecord.status.name() == 'REJECTED'}" class="text-center py-5">
+                                <div class="mb-3">
+                                    <i class="fas fa-times-circle text-danger fa-4x"></i>
+                                </div>
+                                <h5 class="text-danger font-weight-bold">Yêu cầu bị từ chối</h5>
+                                <p class="text-muted">
+                                    Rất tiếc, yêu cầu mượn thiết bị cho buổi tư vấn này không được Admin phê duyệt. <br>
+                                    Vui lòng liên hệ trực tiếp phòng Lab để biết thêm chi tiết.
+                                </p>
+                            </div>
+
+                            <div th:if="${evaluation.session.borrowingRecord.status.name() == 'PENDING_ALLOCATION'}" class="text-center py-5">
+                                <div class="mb-3">
+                                    <i class="fas fa-clock text-warning fa-3x"></i>
+                                </div>
+                                <h5 class="text-dark font-weight-bold">Yêu cầu đang được xử lý</h5>
+                                <p class="text-muted">
+                                    Danh sách thiết bị đang chờ Admin phê duyệt. <br>
+                                    Các thiết bị đặc biệt có thể yêu cầu thanh toán tiền cọc trước khi nhận.
+                                </p>
+                            </div>
+                        </div>
+
+                        <div class="mt-auto">
+                            <hr>
+                            <div class="alert border-0 shadow-none mb-0"
+                                 th:classappend="${evaluation.session.borrowingRecord.status.name() == 'REJECTED' ? 'alert-danger' : 'alert-info'}">
+                                <div class="d-flex align-items-center">
+                                    <i class="fas fa-info-circle fa-lg mr-3"></i>
+                                    <div>
+                                        <th:block th:if="${evaluation.session.borrowingRecord.status.name() == 'EXPORTED'}">
+                                            Vui lòng bảo quản thiết bị cẩn thận và hoàn trả đúng hạn quy định của phòng Lab.
+                                        </th:block>
+                                        <th:block th:if="${evaluation.session.borrowingRecord.status.name() == 'REJECTED'}">
+                                            Lưu ý: Mọi thắc mắc về việc từ chối thiết bị, bạn có thể gửi phản hồi cho quản trị viên.
+                                        </th:block>
+                                        <th:block th:if="${evaluation.session.borrowingRecord.status.name() == 'PENDING_ALLOCATION'}">
+                                            Ghi chú: Sau khi được Admin phê duyệt, bạn có thể đến phòng Lab để nhận thiết bị.
+                                        </th:block>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div th:replace="~{layout/main-layout :: scripts}"></div>
+</body>
+</html>

@@ -30,7 +30,7 @@ public class EvaluationRequest {
         private Long equipmentId;
 
         @NotNull(message = "Số lượng không được để trống")
-        @Min(value = 1, message = "Số lượng mượn tối thiểu là 1")
+        @Min(value = 0, message = "Số lượng không hợp lệ")
         private Integer quantity;
     }
 }
